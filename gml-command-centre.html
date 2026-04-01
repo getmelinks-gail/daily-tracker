@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GetMeLinks · Command Centre</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4f1;--bg2:#fff;--bg3:#f0efec;--bg4:#e8e7e4;
+  --border:#e2e0db;--border2:#cccac4;
+  --ink:#1a1917;--ink2:#5c5a55;--ink3:#9c9a95;
+  --red:#c0392b;--red-l:rgba(192,57,43,0.08);
+  --amber:#b8650a;--amber-l:rgba(184,101,10,0.09);
+  --green:#2d7a4f;--green-l:rgba(45,122,79,0.09);
+  --blue:#2563a8;--blue-l:rgba(37,99,168,0.09);
+  --purple:#6b4fad;--purple-l:rgba(107,79,173,0.09);
+  --r:10px;--rs:6px;
+}
+html{background:var(--bg);color:var(--ink);font-family:'Geist',sans-serif;font-size:14px;line-height:1.6}
+body{min-height:100vh;padding:0 0 4rem}
+
+/* SETUP BANNER */
+#setup-banner{background:var(--blue-l);border-bottom:1px solid rgba(37,99,168,0.18);padding:10px 1.5rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#setup-banner p{font-size:12px;color:var(--blue);flex:1}
+#setup-banner strong{font-weight:600}
+.setup-input{padding:5px 10px;border-radius:var(--rs);border:1px solid rgba(37,99,168,0.3);background:white;font-size:12px;font-family:'Geist',sans-serif;width:380px;outline:none;color:var(--ink)}
+.setup-save{padding:5px 14px;border-radius:var(--rs);border:none;background:var(--blue);color:white;font-size:12px;font-weight:500;cursor:pointer;font-family:'Geist',sans-serif}
+.setup-save:hover{opacity:.9}
+.setup-close{background:none;border:none;cursor:pointer;color:var(--blue);font-size:18px;line-height:1;margin-left:auto;padding:0 4px;opacity:.7}
+.setup-close:hover{opacity:1}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:100;background:rgba(245,244,241,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:54px;display:flex;align-items:center;gap:10px}
+.logo{font-family:'Instrument Serif',serif;font-size:18px;color:var(--ink);white-space:nowrap}
+.logo em{color:var(--amber);font-style:normal}
+.tabs{display:flex;gap:2px;margin-left:6px}
+.tab{padding:5px 13px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--ink3);font-family:'Geist',sans-serif;transition:all .15s}
+.tab:hover{background:var(--bg3);color:var(--ink2)}
+.tab.on{background:var(--ink);color:#fff}
+.topbar-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(45,122,79,0.4)}50%{opacity:.7;box-shadow:0 0 0 5px rgba(45,122,79,0)}}
+.live-txt{font-size:11px;color:var(--green);font-weight:500}
+.sync-lbl{font-size:11px;color:var(--ink3)}
+.btn{padding:6px 13px;border-radius:var(--rs);font-size:12px;font-weight:500;cursor:pointer;font-family:'Geist',sans-serif;transition:all .15s;border:1px solid var(--border2);background:var(--bg3);color:var(--ink2)}
+.btn:hover{background:var(--bg4);color:var(--ink)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.pri{background:var(--amber);color:#fff;border-color:var(--amber)}
+.btn.pri:hover{opacity:.9}
+.btn.danger{background:var(--red-l);color:var(--red);border-color:rgba(192,57,43,0.2)}
+
+/* LAYOUT */
+.shell{max-width:1060px;margin:0 auto;padding:1.5rem}
+.page{display:none}.page.on{display:block}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:1.25rem}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+.stat-l{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:5px}
+.stat-v{font-size:24px;font-weight:600;line-height:1}
+.vr{color:var(--red)}.va{color:var(--amber)}.vg{color:var(--green)}.vp{color:var(--purple)}
+.stat-s{font-size:11px;color:var(--ink3);margin-top:3px}
+.prog{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:1.25rem}
+.prog-f{height:100%;background:linear-gradient(90deg,var(--amber),var(--green));border-radius:2px;transition:width .5s}
+
+/* FILTER */
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem;align-items:center}
+.fbtn{padding:4px 13px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--ink3);font-family:'Geist',sans-serif;transition:all .15s}
+.fbtn:hover{border-color:var(--border2);color:var(--ink2)}
+.fbtn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.search-w{margin-left:auto;position:relative}
+.search-w input{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:5px 12px 5px 28px;font-size:12px;color:var(--ink);font-family:'Geist',sans-serif;width:180px;outline:none}
+.search-w input::placeholder{color:var(--ink3)}
+.si{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:12px}
+
+/* SECTIONS */
+.sh{display:flex;align-items:center;gap:10px;margin:1.75rem 0 .8rem}
+.st{font-family:'Instrument Serif',serif;font-size:19px;font-style:italic}
+.sc{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px}
+.sc-r{background:var(--red-l);color:var(--red)}.sc-a{background:var(--amber-l);color:var(--amber)}.sc-g{background:var(--green-l);color:var(--green)}
+
+/* CARDS */
+.cards{display:flex;flex-direction:column;gap:7px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04);animation:fu .2s ease both}
+@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.card.h::before{background:var(--red)}.card.m::before{background:var(--amber)}.card.l::before{background:var(--blue)}
+.card:hover{border-color:var(--border2);box-shadow:0 3px 10px rgba(0,0,0,0.07)}
+.card.done{opacity:.38}.card.done .ctitle{text-decoration:line-through}
+.ctop{display:flex;align-items:flex-start;gap:11px}
+.chk{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;transition:all .15s;cursor:pointer}
+.chk.on{background:var(--green);border-color:var(--green)}
+.chk svg{width:10px;height:10px}
+.cbody{flex:1;min-width:0}
+.cmeta{display:flex;align-items:center;gap:7px;margin-bottom:4px;flex-wrap:wrap}
+.cname{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3)}
+.badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500}
+.ba{background:var(--amber-l);color:var(--amber)}.br{background:var(--red-l);color:var(--red)}.bg{background:var(--green-l);color:var(--green)}.bb{background:var(--blue-l);color:var(--blue)}.bp{background:var(--purple-l);color:var(--purple)}.bx{background:var(--bg3);color:var(--ink3)}
+.ctitle{font-size:13px;font-weight:500;color:var(--ink);line-height:1.4;margin-bottom:4px}
+.cnote{font-size:12px;color:var(--ink2);line-height:1.55}
+.clinks{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.cl{font-size:11px;padding:2px 9px;border-radius:4px;border:1px solid var(--border2);color:var(--ink3);text-decoration:none;transition:all .15s}
+.cl:hover{background:var(--bg3);color:var(--ink)}
+.cright{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.cdate{font-size:11px;color:var(--ink3)}
+.ebtn{font-size:11px;padding:3px 9px;border-radius:5px;border:1px solid var(--border2);background:transparent;cursor:pointer;font-family:'Geist',sans-serif;color:var(--ink3);transition:all .15s}
+.ebtn:hover{background:var(--bg3);color:var(--ink)}
+
+/* COMPLETED */
+.comp-btn{display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 0;color:var(--ink3);font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;border:none;background:none;font-family:'Geist',sans-serif;border-top:1px solid var(--border);margin-top:1.25rem;width:100%}
+.comp-btn:hover{color:var(--ink2)}
+.arr{transition:transform .2s;display:inline-block}.arr.open{transform:rotate(90deg)}
+#comp{display:none}#comp.open{display:flex;flex-direction:column;gap:7px;margin-top:7px}
+
+/* SYNC BAR */
+.sbar{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;margin-bottom:1.25rem;font-size:12px}
+.sbar.loading{background:var(--amber-l);border:1px solid rgba(184,101,10,.2);color:var(--amber)}
+.sbar.ok{background:var(--green-l);border:1px solid rgba(45,122,79,.2);color:var(--green)}
+.sbar.err{background:var(--red-l);border:1px solid rgba(192,57,43,.2);color:var(--red)}
+.spinner{width:14px;height:14px;border:2px solid rgba(184,101,10,.3);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:26px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.12)}
+.modal h2{font-family:'Instrument Serif',serif;font-size:21px;margin-bottom:1.25rem}
+.f{margin-bottom:12px}
+.f label{display:block;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin-bottom:4px}
+.f input,.f textarea,.f select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:8px 11px;font-size:13px;color:var(--ink);font-family:'Geist',sans-serif;outline:none;transition:border-color .15s}
+.f input:focus,.f textarea:focus,.f select:focus{border-color:var(--border2)}
+.f input::placeholder,.f textarea::placeholder{color:var(--ink3)}
+.f textarea{resize:vertical;min-height:65px}
+.f select{appearance:none}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mact{display:flex;gap:8px;margin-top:18px;justify-content:flex-end}
+
+/* BRIEF */
+.brief-layout{display:grid;grid-template-columns:300px 1fr;gap:1.5rem}
+.bside{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px;position:sticky;top:66px}
+.bside h3{font-family:'Instrument Serif',serif;font-size:16px;margin-bottom:12px}
+.bf{margin-bottom:9px}
+.bf label{display:block;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin-bottom:4px}
+.bf input,.bf textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:7px 10px;font-size:12px;color:var(--ink);font-family:'Geist',sans-serif;outline:none}
+.bf textarea{resize:vertical;min-height:50px}
+.bf input::placeholder,.bf textarea::placeholder{color:var(--ink3)}
+.date-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.date-row label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);white-space:nowrap}
+.date-row input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:6px 9px;font-size:12px;color:var(--ink);font-family:'Geist',sans-serif;outline:none}
+.add-call{width:100%;padding:7px;border-radius:var(--rs);border:1px dashed var(--border2);background:transparent;font-size:12px;font-weight:500;cursor:pointer;font-family:'Geist',sans-serif;color:var(--ink3);transition:all .15s;margin-top:3px}
+.add-call:hover{background:var(--bg3);color:var(--ink2)}
+.tref{font-size:11px;color:var(--ink3);font-family:monospace;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:10px;line-height:1.65;margin-top:10px}
+.cblk{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:9px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.blkh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:9px;border-bottom:1px solid var(--border)}
+.blkn{font-family:'Instrument Serif',serif;font-size:15px}
+.rmbtn{background:none;border:none;cursor:pointer;color:var(--ink3);font-size:19px;line-height:1;padding:0;transition:color .15s}
+.rmbtn:hover{color:var(--red)}
+.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.prev-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-top:1.25rem}
+.prev-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.prev-h h3{font-family:'Instrument Serif',serif;font-size:16px}
+.prev{font-family:'Geist',sans-serif;font-size:12.5px;line-height:1.8;color:var(--ink2);white-space:pre-wrap;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:14px;min-height:180px}
+
+/* SHARE PANEL */
+.share-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:1.5rem}
+.share-panel h3{font-family:'Instrument Serif',serif;font-size:18px;margin-bottom:4px}
+.share-panel p{font-size:12px;color:var(--ink2);margin-bottom:14px}
+.share-steps{display:flex;flex-direction:column;gap:8px}
+.share-step{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--amber);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-body{flex:1}
+.step-title{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:2px}
+.step-desc{font-size:12px;color:var(--ink2);line-height:1.5}
+.step-desc code{font-family:monospace;background:var(--bg4);padding:1px 5px;border-radius:3px;font-size:11px}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(8px);background:var(--ink);border-radius:var(--rs);padding:9px 18px;font-size:13px;color:#fff;z-index:300;opacity:0;transition:all .3s;white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,0.14)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty{text-align:center;padding:3rem 1rem;color:var(--ink3);font-size:13px}
+
+@media(max-width:860px){.brief-layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}.bgrid{grid-template-columns:1fr}}
+@media(max-width:480px){.stats{grid-template-columns:repeat(2,1fr)}.topbar{padding:0 1rem}}
+</style>
+</head>
+<body>
+
+<!-- API KEY SETUP BANNER -->
+<div id="setup-banner">
+  <p><strong>🔑 One-time setup:</strong> Enter your Anthropic API key to enable live Slack sync. Your key is saved only in this browser — never shared anywhere.</p>
+  <input class="setup-input" type="password" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off">
+  <button class="setup-save" onclick="saveApiKey()">Save key</button>
+  <button class="setup-close" onclick="document.getElementById('setup-banner').style.display='none'">×</button>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">GetMeLinks <em>·</em> Command Centre</div>
+  <div class="tabs">
+    <button class="tab on" onclick="goPage('deliverables',this)">📋 Deliverables</button>
+    <button class="tab" onclick="goPage('callbrief',this)">📞 Call Brief</button>
+    <button class="tab" onclick="goPage('share',this)">📤 Share</button>
+  </div>
+  <div class="topbar-r">
+    <div class="live-dot"></div>
+    <span class="live-txt">LIVE</span>
+    <span class="sync-lbl" id="sync-lbl">Ready</span>
+    <button class="btn" id="sync-btn" onclick="syncNow()">↻ Sync Slack</button>
+    <button class="btn pri" onclick="openModal()">+ Add Task</button>
+  </div>
+</div>
+
+<!-- PAGE: DELIVERABLES -->
+<div class="shell page on" id="page-deliverables">
+  <div id="sbar"></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-l">Pending</div><div class="stat-v vr" id="s-tot">—</div><div class="stat-s">active</div></div>
+    <div class="stat"><div class="stat-l">ASAP</div><div class="stat-v vr" id="s-asap">—</div><div class="stat-s">due now</div></div>
+    <div class="stat"><div class="stat-l">This Week</div><div class="stat-v va" id="s-week">—</div><div class="stat-s">coming up</div></div>
+    <div class="stat"><div class="stat-l">Awaiting Alex</div><div class="stat-v vp" id="s-alex">—</div><div class="stat-s">needs action</div></div>
+    <div class="stat"><div class="stat-l">Done</div><div class="stat-v vg" id="s-done">—</div><div class="stat-s">completed</div></div>
+  </div>
+  <div class="prog"><div class="prog-f" id="prog" style="width:0%"></div></div>
+  <div class="filters">
+    <button class="fbtn on" onclick="setF('all',this)">All</button>
+    <button class="fbtn" onclick="setF('asap',this)">🔴 ASAP</button>
+    <button class="fbtn" onclick="setF('week',this)">🟡 This Week</button>
+    <button class="fbtn" onclick="setF('alex',this)">👤 Alex</button>
+    <button class="fbtn" onclick="setF('gail',this)">✅ Gail</button>
+    <div class="search-w"><span class="si">⌕</span><input type="text" id="q" placeholder="Search..." oninput="render()"></div>
+  </div>
+  <div id="cards"></div>
+  <button class="comp-btn" onclick="toggleComp()"><span class="arr" id="arr">▶</span>Completed (<span id="comp-n">0</span>)</button>
+  <div id="comp"></div>
+</div>
+
+<!-- PAGE: CALL BRIEF -->
+<div class="shell page" id="page-callbrief">
+  <div style="margin-bottom:1.25rem">
+    <div style="font-family:'Instrument Serif',serif;font-size:24px;margin-bottom:3px">Call Brief Builder</div>
+    <div style="font-size:13px;color:var(--ink3)">Fill in each call then copy to <strong style="color:var(--ink2)">#alex-daily-brief</strong></div>
+  </div>
+  <div class="brief-layout">
+    <div>
+      <div class="bside">
+        <h3>Settings</h3>
+        <div class="date-row"><label>Date</label><input type="date" id="bd" oninput="genBrief()"></div>
+        <button class="add-call" onclick="addCall()">+ Add call</button>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <div style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px">Template</div>
+          <div class="tref">📋 Today's Call Brief — [DATE]<br>-------------------------<br>Call N — [Name] · [Time]<br><br>1. Client name:<br>2. Type of call:<br>3. Time:<br>4. Site:<br>5. Link report:<br>6. Audit sheet:<br>7. Order sheet:<br>8. SPP Link:<br>9. tldv link:<br>10. Notes:<br>-------------------------</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div id="cblocks"></div>
+      <div class="prev-wrap">
+        <div class="prev-h">
+          <h3>Generated brief</h3>
+          <div style="display:flex;gap:7px">
+            <button class="btn" onclick="copyBrief()">Copy</button>
+            <button class="btn pri" onclick="copyForSlack()">Copy for #alex-daily-brief</button>
+          </div>
+        </div>
+        <div class="prev" id="prev-out">Fill in call details above...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: SHARE -->
+<div class="shell page" id="page-share">
+  <div style="font-family:'Instrument Serif',serif;font-size:26px;margin-bottom:4px">Share this dashboard</div>
+  <div style="font-size:13px;color:var(--ink3);margin-bottom:1.5rem">Anyone you share this file with can open it in their browser and see all tasks live.</div>
+
+  <div class="share-panel">
+    <h3>How to host on GitHub Pages (free, permanent link)</h3>
+    <p>The dashboard is a single HTML file. Host it on GitHub Pages and anyone with your link can open it in their browser instantly — no login needed, free forever.</p>
+    <div class="share-steps">
+      <div class="share-step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Create a free GitHub account</div><div class="step-desc">Go to <a href="https://github.com/signup" target="_blank" style="color:var(--blue)">github.com/signup</a> and sign up. Free plan is all you need — no credit card.</div></div></div>
+      <div class="share-step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Create a new repository</div><div class="step-desc">Click the <code>+</code> icon top-right → New repository → name it <code>gml-tracker</code> → set to Public → tick <code>Add a README file</code> → Create repository.</div></div></div>
+      <div class="share-step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Upload the dashboard file</div><div class="step-desc">Inside your new repo, click <code>Add file</code> → <code>Upload files</code> → drag in the downloaded <code>gml-command-centre.html</code> → rename it to <code>index.html</code> → click <code>Commit changes</code>.</div></div></div>
+      <div class="share-step"><div class="step-num">4</div><div class="step-body"><div class="step-title">Enable GitHub Pages</div><div class="step-desc">Go to your repo → <code>Settings</code> → <code>Pages</code> (left sidebar) → under Source select <code>Deploy from a branch</code> → Branch: <code>main</code> → folder: <code>/ (root)</code> → click <code>Save</code>. Wait ~60 seconds.</div></div></div>
+      <div class="share-step"><div class="step-num">5</div><div class="step-body"><div class="step-title">Get your live link</div><div class="step-desc">Go back to Settings → Pages — your URL will appear: <code>https://YOUR-USERNAME.github.io/gml-tracker</code>. That's your permanent link — share it with anyone!</div></div></div>
+      <div class="share-step"><div class="step-num">6</div><div class="step-body"><div class="step-title">Keeping it updated</div><div class="step-desc">When Alex sends new tasks: click <strong>↻ Sync Slack</strong> → click <strong>Download latest dashboard</strong> → go to your GitHub repo → click <code>index.html</code> → pencil icon → drag new file → <code>Commit changes</code>. Link stays the same!</div></div></div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px">
+      <button class="btn pri" onclick="downloadDashboard()">⬇ Download latest dashboard</button>
+      <button class="btn" onclick="copyShareInstructions()">Copy these instructions</button>
+    </div>
+  </div>
+
+  <div class="share-panel" style="margin-top:0">
+    <h3>API key — for live Slack sync</h3>
+    <p>The Sync Slack button uses an Anthropic API key to parse Alex's messages with AI. Your key is stored only in your browser's local storage — it is never sent anywhere except directly to Anthropic's API.</p>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+      <input class="setup-input" type="password" id="api-key-input2" placeholder="sk-ant-api03-..." style="flex:1;max-width:400px">
+      <button class="btn pri" onclick="saveApiKey2()">Save key</button>
+      <button class="btn danger" onclick="clearApiKey()">Clear key</button>
+    </div>
+    <div style="font-size:11px;color:var(--ink3);margin-top:8px">Get your key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--blue)">console.anthropic.com</a> → API Keys → Create key</div>
+  </div>
+</div>
+
+<!-- TASK MODAL -->
+<div class="overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2 id="mh">Add Task</h2>
+    <div class="frow">
+      <div class="f"><label>Client</label><input id="fc" type="text" placeholder="e.g. Aaron Parker"></div>
+      <div class="f"><label>Priority</label><select id="fp"><option value="high">🔴 ASAP</option><option value="medium">🟡 This Week</option><option value="low">🔵 Coming Up</option></select></div>
+    </div>
+    <div class="f"><label>Title</label><input id="ft" type="text" placeholder="Task summary"></div>
+    <div class="f"><label>Notes</label><textarea id="fn" placeholder="Details, context..."></textarea></div>
+    <div class="frow">
+      <div class="f"><label>Assigned to</label><select id="fa"><option value="gail">Gail</option><option value="alex">Alex</option><option value="both">Both</option><option value="team">Team</option></select></div>
+      <div class="f"><label>Category</label><select id="fcat"><option value="invoice">Invoice/Payment</option><option value="order">Link Order</option><option value="report">Report/Analysis</option><option value="comms">Client Comms</option><option value="3d">3D Analysis</option><option value="call">Call Prep</option><option value="contract">Contract/NDA</option><option value="other">Other</option></select></div>
+    </div>
+    <div class="f"><label>Links (Label|URL, comma-sep)</label><input id="fl" type="text" placeholder="Report|https://..., SPP|https://..."></div>
+    <div class="mact">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn pri" onclick="saveTask()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+// STATE & STORAGE
+// ═══════════════════════════════════════
+const SK = 'gml_tasks_v4';
+const AK = 'gml_api_key';
+let tasks = [], editId = null, filt = 'all', syncing = false;
+let calls = [];
+
+const BF = ['client-name','call-type','call-time','site','link-report','audit-sheet','order-sheet','spp-link','tldv-link','notes'];
+const BL = ['Client name','Type of call','Time','Site','Link report','Audit sheet','Order sheet','SPP Link','tldv link','Notes'];
+
+function load() {
+  try {
+    const r = localStorage.getItem(SK);
+    if (r) { tasks = JSON.parse(r); }
+    else { tasks = [...SEED]; save(); }
+  } catch(e) { tasks = [...SEED]; }
+
+  // Check if API key already saved
+  const key = localStorage.getItem(AK);
+  if (key) {
+    document.getElementById('setup-banner').style.display = 'none';
+    document.getElementById('api-key-input').value = key;
+    document.getElementById('api-key-input2').value = key;
+  }
+}
+
+function save() { localStorage.setItem(SK, JSON.stringify(tasks)); }
+
+function saveApiKey() {
+  const k = document.getElementById('api-key-input').value.trim();
+  if (!k) { toast('Please enter your API key'); return; }
+  localStorage.setItem(AK, k);
+  document.getElementById('api-key-input2').value = k;
+  document.getElementById('setup-banner').style.display = 'none';
+  toast('API key saved ✓');
+}
+function saveApiKey2() {
+  const k = document.getElementById('api-key-input2').value.trim();
+  if (!k) { toast('Please enter your API key'); return; }
+  localStorage.setItem(AK, k);
+  document.getElementById('api-key-input').value = k;
+  document.getElementById('setup-banner').style.display = 'none';
+  toast('API key saved ✓');
+}
+function clearApiKey() {
+  localStorage.removeItem(AK);
+  document.getElementById('api-key-input').value = '';
+  document.getElementById('api-key-input2').value = '';
+  document.getElementById('setup-banner').style.display = 'flex';
+  toast('API key cleared');
+}
+
+// ═══════════════════════════════════════
+// SEED DATA (latest from Slack Apr 1)
+// ═══════════════════════════════════════
+const SEED = [
+  {id:'t1',client:'Jason Ibarra',title:'🔝 TOP PRIO: 3D analysis + updated link report (due today)',notes:"Alex: Top prio. 3D on pages built. Link report to Alex first. Bruno's client, $10K/mo × 7mo.",priority:'high',assigned:'alex',category:'3d',links:[{l:'Link report',u:'https://drive.google.com/file/d/1wDvt2kg8wO_j5ruBfa4TFprx5FaRUJJE/view?usp=sharing'},{l:'Audit sheet',u:'https://docs.google.com/spreadsheets/d/1BgcdJKB_EXCL5Bs32fKgfCG4aikoNf7y8OLfps45C5k/edit?gid=275179303'},{l:'tldv',u:'https://tldv.io/app/meetings/69c3f13fb1aac4001329bdf3'}],done:false,created:'2026-04-01'},
+  {id:'t2',client:'Alex Smith (Fastmoldtesting)',title:'Close deal — $4k listicles',notes:'Deals to close #1. All docs prepared.',priority:'high',assigned:'alex',category:'comms',links:[{l:'Order sheet',u:'https://docs.google.com/spreadsheets/d/1fJa2lAXKYkTKP4MXiijzV9rLMA4qSI-wFC9DahPDZ0M/edit?gid=838336414'},{l:'Site',u:'https://fastmoldtesting.com/'},{l:'Link report',u:'https://drive.google.com/file/d/1pByPz5vVQz7mkRrq1OlghzA52ZTyLa3a/view?usp=sharing'}],done:false,created:'2026-04-01'},
+  {id:'t3',client:'Eric Darby',title:'Close deal — new custom quote',notes:'Deals to close #2.',priority:'high',assigned:'gail',category:'invoice',links:[],done:false,created:'2026-04-01'},
+  {id:'t4',client:'Michael Bui (bloom10x)',title:'Close deal — follow up today',notes:'Deals to close #3. wholesalefashiontrends.com.',priority:'high',assigned:'gail',category:'comms',links:[{l:'Audit sheet',u:'https://docs.google.com/spreadsheets/d/1FpaaaCoJv6S1C8pzCKHNIUpqc6ggxkbpEF-YHRaYN8k/edit?gid=275179303'},{l:'SPP',u:'https://getmelinks.wayfront.com/accounts/6552'}],done:false,created:'2026-04-01'},
+  {id:'t5',client:'Save on Smokes',title:'3D analysis — 2 pages + invoice issue',notes:'3D on 2 pages. Client never received invoice — resend.',priority:'high',assigned:'alex',category:'3d',links:[{l:'Invoice',u:'https://getmelinks.spp.io/share/invoices/4E59086B?key=640e57706795390ef5a6f846a9023b41'}],done:false,created:'2026-04-01'},
+  {id:'t6',client:'Deepak (medicaltourismco.com)',title:'3D analysis — 5 pages + 3D skill',notes:'Run 3D on 5 pages. Send skill + export 6 link-building pages.',priority:'high',assigned:'alex',category:'3d',links:[{l:'Site',u:'https://www.medicaltourismco.com/'}],done:false,created:'2026-04-01'},
+  {id:'t7',client:'Yousuf Ascend',title:'3D analysis — 5 pages',notes:'Run 3D on 5 pages.',priority:'high',assigned:'alex',category:'3d',links:[],done:false,created:'2026-04-01'},
+  {id:'t8',client:'Bailey Gibson (TBE Electrical)',title:'3D homepage + 4D report + tldv + SPP email',notes:'3D homepage. Send 4D report. tldv for speed fixes. Email via SPP portal. Next call Apr 25.',priority:'high',assigned:'alex',category:'3d',links:[{l:'tldv',u:'https://tldv.io/app/meetings/69c178b1653a8c00130c13b0/'}],done:false,created:'2026-04-01'},
+  {id:'t9',client:'Jorge Dominguez',title:'3D homepage + 3 competitors + GSC index (call tomorrow)',notes:'3D + index management plan. Alex must sign NDA. $250 consult.',priority:'high',assigned:'both',category:'3d',links:[{l:'Link report',u:'https://drive.google.com/file/d/1_IAOxhl4Md0OFhene09i9vEXBfixVhUr/view?usp=sharing'},{l:'SPP',u:'https://getmelinks.spp.io/accounts/6550'}],done:false,created:'2026-04-01'},
+  {id:'t10',client:'Graham T (Parkman Woodworks)',title:'3D — linked pages + new pages from client',notes:'3D all built-link pages + new client pages.',priority:'high',assigned:'alex',category:'3d',links:[{l:'Conference tables',u:'https://www.parkmanwoodworks.com/collections/custom-solid-wood-conference-tables'}],done:false,created:'2026-04-01'},
+  {id:'t11',client:'Tom Batting',title:'3D analysis — 5 pages + updated link report',notes:'3D 5 pages. Updated link report also needed.',priority:'high',assigned:'alex',category:'3d',links:[{l:'Link report',u:'https://drive.google.com/file/d/1YqnjyzLqc7_QiMBL16Jwymm8-xdH-fXo/view?usp=sharing'},{l:'SPP',u:'https://getmelinks.spp.io/accounts/5049'}],done:false,created:'2026-04-01'},
+  {id:'t12',client:'Steve Laff (assileye.com)',title:'3D — homepage + 2 pages',notes:'3D homepage + eye-care/cataract-surgery page.',priority:'high',assigned:'alex',category:'3d',links:[{l:'Link report',u:'https://drive.google.com/file/d/1rrsY_eJBQH8tZJ8g76uakRLa93UOCfLb/view?usp=sharing'}],done:false,created:'2026-04-01'},
+  {id:'t13',client:'Lendforall (lendforall.ca)',title:'3D — homepage + top 3 competitors',notes:"Bruno's client, loan niche. Risk of churn.",priority:'high',assigned:'alex',category:'3d',links:[{l:'Link report',u:'https://drive.google.com/file/d/12VxO_hsBOzU6-lsBND93EFT1-IWMaIAs/view?usp=sharing'}],done:false,created:'2026-04-01'},
+  {id:'t14',client:'Carlos / Alex (buymyweed.cc)',title:'3D — homepage + previously linked pages',notes:'NEW Apr 1. 3D on homepage + all previously linked pages.',priority:'high',assigned:'alex',category:'3d',links:[{l:'SPP',u:'https://getmelinks.spp.io/accounts/5977'}],done:false,created:'2026-04-01'},
+  {id:'t15',client:'Joe Kattan',title:'Multiple reports + meeting prep — next Tuesday',notes:"Meeting Tue. Kerly: local NY appraisers or nationwide? Alex to clarify. Inform Joe of site replacements.",priority:'high',assigned:'both',category:'report',links:[{l:'Order sheet',u:'https://docs.google.com/spreadsheets/d/1RAkDdpP8OQQKovFFQ90V-UPM0z6Fr99a8HeYhMLzZz0/edit?gid=980804316'}],done:false,created:'2026-04-01'},
+  {id:'t16',client:'Ron Gastfreund',title:'Run reports + anchors & targets 2 months + email',notes:'In progress.',priority:'high',assigned:'gail',category:'report',links:[],done:false,created:'2026-04-01'},
+  {id:'t17',client:'Matthew (investigateSC)',title:'Updated link report based on pages sent ✅',notes:'Completed per Gail update.',priority:'high',assigned:'gail',category:'report',links:[{l:'Link report',u:'https://drive.google.com/file/d/1P5O2w0b0jPQVwjTZ6FalmQrnwEsWFdkg/view?usp=sharing'}],done:true,created:'2026-04-01'},
+  {id:'t18',client:'Richard Lehman',title:'Send email + invite to book update session ✅',notes:'Completed per Gail update.',priority:'high',assigned:'gail',category:'comms',links:[],done:true,created:'2026-04-01'},
+  {id:'t19',client:'Guy (New Client)',title:'Mark SPP invoice paid + kick off link order',notes:'Stripe confirmed. Mark paid manually. Homepage brand anchors + internal keyword rich.',priority:'high',assigned:'gail',category:'invoice',links:[{l:'SPP Invoice',u:'https://getmelinks.spp.io/share/invoices/4E59086B?key=640e57706795390ef5a6f846a9023b41'},{l:'Order Sheet',u:'https://docs.google.com/spreadsheets/d/143JmVDrhohtgPKtUllyor8wI18szBmKT6_k-jzosPPQ/edit?gid=1370808423'}],done:false,created:'2026-04-01'},
+  {id:'t20',client:'Aaron Parker',title:'Invoice & contract — closed $1,028/mo',notes:'Prepare SPP invoice and contract.',priority:'high',assigned:'gail',category:'invoice',links:[],done:false,created:'2026-03-31'},
+  {id:'t21',client:'Aaron Parker',title:'Record Loom + send 6-month quote $1,177/mo',notes:'$1,177/mo · $7,062 total. 16 T1 + 7 T2, 3/mo. Ask Alex: approve? 3 or 4/mo?',priority:'high',assigned:'alex',category:'report',links:[{l:'tldv',u:'https://tldv.io/app/meetings/69bd67a4a42bd00013766765'}],done:false,created:'2026-03-30'},
+  {id:'t22',client:'Dayton Cameron',title:'Send client update — order overdue',notes:'CBD + saturation. 3/5 links live. New TAT: next week.',priority:'high',assigned:'gail',category:'comms',links:[],done:false,created:'2026-04-01'},
+  {id:'t23',client:'Matoom / Khaxsoe',title:'Send client update — order overdue',notes:'2/3 links live. New TAT: next week.',priority:'high',assigned:'gail',category:'comms',links:[],done:false,created:'2026-04-01'},
+  {id:'t24',client:'tldv shared folder',title:'Review Alex\'s new shared tldv meetings folder',notes:'Alex shared all client meetings in one folder — new feature.',priority:'medium',assigned:'gail',category:'other',links:[{l:'tldv folder',u:'https://tldv.io/app/folders/folder_deabcf6a-41f1-46e4-9d4e-1b38a071a6cc'}],done:false,created:'2026-04-01'},
+];
+
+// ═══════════════════════════════════════
+// SYNC — Anthropic API
+// ═══════════════════════════════════════
+async function syncNow() {
+  if (syncing) return;
+  const key = localStorage.getItem(AK);
+  if (!key) {
+    document.getElementById('setup-banner').style.display = 'flex';
+    toast('Please enter your API key first');
+    return;
+  }
+  syncing = true;
+  const btn = document.getElementById('sync-btn');
+  btn.disabled = true; btn.textContent = 'Syncing...';
+  showBar('loading', 'Pulling Alex\'s latest messages and parsing with AI...');
+
+  try {
+    const prompt = `Parse these Slack messages and return a JSON array of task objects.
+Each: {id,client,title,notes,priority("high"|"medium"|"low"),assigned("gail"|"alex"|"both"|"team"),category("invoice"|"order"|"report"|"comms"|"3d"|"call"|"contract"|"other"),links([{l,u}]),done(boolean),created("YYYY-MM-DD")}
+Rules: high=urgent/ASAP/due today. done=true only if marked ✅ or "done". Include ALL open deliverables.
+
+Slack messages (Alex DM with Gail, Apr 1 2026, newest first):
+Alex 16:17: "Thank you. You're really stepping up to a new level"
+Alex 16:03: Shared tldv folder https://tldv.io/app/folders/folder_deabcf6a-41f1-46e4-9d4e-1b38a071a6cc new feature for all client meetings
+Alex 12:26: "Top prio - jason ibarra both 3D and link reports. Then the 3 deals to close. Then the rest"
+Alex 12:24: Deals to close: 1.Alex Fastmoldtesting $4k listicles 2.Eric Darby new custom quote 3.Michael Bui bloom10x follow up today
+Alex 12:22: 3D open: Save On Smokes 2pg, Deepak 5pg+skill, Yousuf ascend 5pg, Bailey TBE homepage, Jorge Dominguez homepage+3competitors+GSC(call tomorrow), Jason Ibarra 3D due today, Graham T linked+new pages, Tom Batting 5pg, Steve Laff 2pg, Lendforall home+3competitors, Carlos/Alex buymyweed.cc homepage+linked pages
+Alex 12:18: Open items: 1.Joe K reports+meeting Tue 2.Ron Gastfreund reports+anchors+email 3.Richard Lehman email+book session 4.Jason Ibarra link report 5.Tom Batting link report 6.Matthew investigateSC link report
+Alex 11:39: Guy paid via Stripe, mark SPP invoice paid manually, link order: homepage brand anchors + internal keyword rich one short one long
+Gail 12:27: Richard Lehman ✅ Jason Ibarra link report ✅ Tom Batting link report ✅ Matthew investigateSC ✅ Joe K in progress Ron Gastfreund in progress
+
+Return ONLY valid JSON array, no markdown, no preamble.`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || 'API error ' + res.status);
+    }
+
+    const data = await res.json();
+    const raw = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      const doneIds = new Set(tasks.filter(t => t.done).map(t => t.id));
+      const localTasks = tasks.filter(t => t.id.startsWith('local_'));
+      const merged = parsed.map(t => ({ ...t, done: doneIds.has(t.id) ? true : (t.done || false) }));
+      tasks = [...merged, ...localTasks];
+      save();
+      render();
+      const ts = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      document.getElementById('sync-lbl').textContent = 'Synced ' + ts;
+      showBar('ok', '✓ Synced — ' + tasks.filter(t=>!t.done).length + ' pending tasks from Alex\'s latest messages');
+      toast('Synced ✓ — ' + parsed.length + ' tasks');
+      setTimeout(hideBar, 4000);
+    }
+  } catch(e) {
+    showBar('err', 'Sync failed: ' + e.message + ' — check your API key in the Share tab');
+    toast('Sync failed');
+  }
+
+  syncing = false;
+  btn.disabled = false; btn.textContent = '↻ Sync Slack';
+}
+
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
+function goPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+  document.getElementById('page-' + id).classList.add('on');
+  btn.classList.add('on');
+}
+
+function setF(f, btn) {
+  filt = f;
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  render();
+}
+
+function getFiltered() {
+  const q = (document.getElementById('q').value || '').toLowerCase();
+  return tasks.filter(t => {
+    if (t.done) return false;
+    if (q && !t.title?.toLowerCase().includes(q) && !t.client?.toLowerCase().includes(q) && !(t.notes||'').toLowerCase().includes(q)) return false;
+    if (filt === 'all') return true;
+    if (filt === 'asap') return t.priority === 'high';
+    if (filt === 'week') return t.priority === 'medium';
+    if (filt === 'alex') return t.assigned === 'alex' || t.assigned === 'both';
+    if (filt === 'gail') return t.assigned === 'gail' || t.assigned === 'both';
+    return true;
+  });
+}
+
+function catB(c) {
+  const m = {invoice:['Invoice','ba'],order:['Link Order','bb'],report:['Report','bp'],comms:['Comms','bg'],contract:['Contract','br'],'3d':['3D Analysis','bb'],call:['Call Prep','bg'],other:['Other','bx']};
+  const [l,cl] = m[c] || ['Other','bx'];
+  return `<span class="badge ${cl}">${l}</span>`;
+}
+function asnB(a) {
+  if (a==='alex') return '<span class="badge bp">👤 Alex</span>';
+  if (a==='gail') return '<span class="badge bg">✅ Gail</span>';
+  if (a==='both') return '<span class="badge ba">⚡ Both</span>';
+  return '<span class="badge bx">Team</span>';
+}
+
+function cardHTML(t) {
+  const ll = (t.links||[]).length ? `<div class="clinks">${t.links.map(lk=>`<a class="cl" href="${lk.u}" target="_blank" onclick="event.stopPropagation()">${lk.l}</a>`).join('')}</div>` : '';
+  const pc = t.priority==='high'?'h':t.priority==='medium'?'m':'l';
+  const svgTick = t.done ? `<svg viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg>` : '';
+  return `<div class="card ${pc} ${t.done?'done':''}" onclick="openModal('${t.id}')">
+    <div class="ctop">
+      <div class="chk ${t.done?'on':''}" onclick="event.stopPropagation();toggleDone('${t.id}')">${svgTick}</div>
+      <div class="cbody">
+        <div class="cmeta"><span class="cname">${t.client||''}</span>${catB(t.category||'other')}${asnB(t.assigned||'gail')}</div>
+        <div class="ctitle">${t.title||''}</div>
+        ${t.notes ? `<div class="cnote">${(t.notes||'').length>150?t.notes.slice(0,150)+'…':t.notes}</div>` : ''}
+        ${ll}
+      </div>
+      <div class="cright"><span class="cdate">${t.created||''}</span><button class="ebtn" onclick="event.stopPropagation();openModal('${t.id}')">Edit</button></div>
+    </div>
+  </div>`;
+}
+
+function render() {
+  const f = getFiltered(), done = tasks.filter(t=>t.done);
+  const asap = f.filter(t=>t.priority==='high'), week = f.filter(t=>t.priority==='medium'), low = f.filter(t=>t.priority==='low');
+  document.getElementById('s-tot').textContent = tasks.filter(t=>!t.done).length;
+  document.getElementById('s-asap').textContent = tasks.filter(t=>!t.done&&t.priority==='high').length;
+  document.getElementById('s-week').textContent = tasks.filter(t=>!t.done&&t.priority==='medium').length;
+  document.getElementById('s-alex').textContent = tasks.filter(t=>!t.done&&(t.assigned==='alex'||t.assigned==='both')).length;
+  document.getElementById('s-done').textContent = done.length;
+  document.getElementById('comp-n').textContent = done.length;
+  const pct = tasks.length ? Math.round(done.length/tasks.length*100) : 0;
+  document.getElementById('prog').style.width = pct + '%';
+  let h = '';
+  if (!f.length) h = '<div class="empty">No tasks match this filter.</div>';
+  else {
+    if (asap.length) h += `<div class="sh"><div class="st">ASAP</div><span class="sc sc-r">${asap.length} tasks</span></div><div class="cards">${asap.map(cardHTML).join('')}</div>`;
+    if (week.length) h += `<div class="sh"><div class="st">This Week</div><span class="sc sc-a">${week.length} tasks</span></div><div class="cards">${week.map(cardHTML).join('')}</div>`;
+    if (low.length) h += `<div class="sh"><div class="st">Coming Up</div><span class="sc sc-g">${low.length} tasks</span></div><div class="cards">${low.map(cardHTML).join('')}</div>`;
+  }
+  document.getElementById('cards').innerHTML = h;
+  document.getElementById('comp').innerHTML = done.length ? `<div class="cards">${done.map(cardHTML).join('')}</div>` : '';
+}
+
+function toggleDone(id) {
+  const t = tasks.find(x=>x.id===id);
+  if (!t) return;
+  t.done = !t.done;
+  save(); render();
+  toast(t.done ? 'Marked complete ✓' : 'Back to pending');
+}
+
+function toggleComp() {
+  document.getElementById('comp').classList.toggle('open');
+  document.getElementById('arr').classList.toggle('open');
+}
+
+// ═══════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════
+function openModal(id = null) {
+  editId = id;
+  if (id) {
+    const t = tasks.find(x=>x.id===id);
+    document.getElementById('mh').textContent = 'Edit Task';
+    document.getElementById('fc').value = t.client||'';
+    document.getElementById('ft').value = t.title||'';
+    document.getElementById('fn').value = t.notes||'';
+    document.getElementById('fp').value = t.priority||'high';
+    document.getElementById('fa').value = t.assigned||'gail';
+    document.getElementById('fcat').value = t.category||'other';
+    document.getElementById('fl').value = (t.links||[]).map(l=>`${l.l}|${l.u}`).join(', ');
+  } else {
+    document.getElementById('mh').textContent = 'Add Task';
+    ['fc','ft','fn','fl'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('fp').value='high';
+    document.getElementById('fa').value='gail';
+    document.getElementById('fcat').value='other';
+  }
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); editId=null; }
+
+function saveTask() {
+  const client = document.getElementById('fc').value.trim();
+  const title = document.getElementById('ft').value.trim();
+  if (!client || !title) { toast('Client and title required'); return; }
+  const lr = document.getElementById('fl').value.trim();
+  const links = lr ? lr.split(',').map(s=>{const[l,...r]=s.trim().split('|');return{l:l.trim(),u:(r.join('|')||'').trim()};}).filter(x=>x.u) : [];
+  const now = new Date();
+  const ds = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const payload = {client,title,notes:document.getElementById('fn').value.trim(),priority:document.getElementById('fp').value,assigned:document.getElementById('fa').value,category:document.getElementById('fcat').value,links};
+  if (editId) {
+    Object.assign(tasks.find(x=>x.id===editId), payload);
+    toast('Updated ✓');
+  } else {
+    tasks.unshift({id:'local_'+Date.now(),...payload,done:false,created:ds});
+    toast('Task added ✓');
+  }
+  save(); render(); closeModal();
+}
+
+// ═══════════════════════════════════════
+// CALL BRIEF
+// ═══════════════════════════════════════
+function initBrief() {
+  const d = new Date();
+  document.getElementById('bd').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  calls = [
+    {id:'b0',f:{'client-name':'Rony Islam','call-type':'Link Building Strategy','call-time':'18:30 KL Time','site':'http://enorsia.com','order-sheet':'https://docs.google.com/spreadsheets/d/1zuSE856gMPb7p5l9H2vH6Cn4tNpy7uoTAUYcoEEeKq4/edit','spp-link':'https://getmelinks.spp.io/accounts/6345','notes':"New client — not in database yet. Add to #client-database."}},
+    {id:'b1',f:{'client-name':'Jason Ibarra','call-type':'Monthly check in, SEO Discussion','call-time':'22:30 KL Time','site':'http://coastalmovingservices.com','link-report':'https://drive.google.com/file/d/1wDvt2kg8wO_j5ruBfa4TFprx5FaRUJJE/view?usp=sharing','audit-sheet':'https://docs.google.com/spreadsheets/d/1BgcdJKB_EXCL5Bs32fKgfCG4aikoNf7y8OLfps45C5k/edit','order-sheet':'https://docs.google.com/spreadsheets/d/1mWUVuJFmy2cWX7bbb2w-ouW2X4ne4LxpBHuDWV7eUmA/edit','spp-link':'https://getmelinks.spp.io/accounts/6099','tldv-link':'https://tldv.io/app/meetings/69c3f13fb1aac4001329bdf3','notes':"Bruno's client. $10K/mo × 7mo. Need 3D report + updated link report."}},
+    {id:'b2',f:{'client-name':'Raghav Dutta','call-type':'Link Building Strategy','call-time':'1:30 AM KL Time','site':'http://www.powerhvacgta.ca','notes':'New lead. No link report yet. Needs quality backlinks for better auth score.'}},
+    {id:'b3',f:{'client-name':'Luis from pixa.com','call-type':'Link Building Strategy','call-time':'2:00 AM KL Time','site':'https://www.pixa.com','notes':'New lead. Site migration ~1.5mo ago. Was ranking top 1-3 for [background remover] + [image upscaler]. Need links to speed recovery.'}},
+  ];
+  renderCalls();
+}
+
+function addCall() { calls.push({id:'b'+Date.now(),f:{}}); renderCalls(); }
+function removeCall(id) { calls=calls.filter(c=>c.id!==id); renderCalls(); }
+
+function renderCalls() {
+  document.getElementById('cblocks').innerHTML = calls.map((call,idx)=>`
+    <div class="cblk">
+      <div class="blkh">
+        <div class="blkn">Call ${idx+1}</div>
+        ${calls.length>1?`<button class="rmbtn" onclick="removeCall('${call.id}')">×</button>`:''}
+      </div>
+      <div class="bgrid">
+        ${BF.map((fk,fi)=>{
+          const v=(call.f[fk]||'').replace(/"/g,'&quot;');
+          const big=fk==='notes';
+          if(big) return`<div class="bf" style="grid-column:1/-1"><label>${fi+1}. ${BL[fi]}</label><textarea oninput="calls.find(c=>c.id==='${call.id}').f['${fk}']=this.value;genBrief()">${call.f[fk]||''}</textarea></div>`;
+          return`<div class="bf"><label>${fi+1}. ${BL[fi]}</label><input type="text" value="${v}" oninput="calls.find(c=>c.id==='${call.id}').f['${fk}']=this.value;genBrief()"></div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+  genBrief();
+}
+
+function fmtDate(s) {
+  if(!s) return '';
+  const[y,m,d]=s.split('-');
+  return `${d} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]} ${y}`;
+}
+
+function genBrief() {
+  const date = fmtDate(document.getElementById('bd').value);
+  let b = `📋 Today's Call Brief — ${date}\n`;
+  calls.forEach((call,i)=>{
+    const name=call.f['client-name']||`Client ${i+1}`;
+    const time=call.f['call-time']||'';
+    b+=`\n-------------------------\n\nCall ${i+1} — ${name}${time?' · '+time:''}\n\n`;
+    BF.forEach((fk,fi)=>{ b+=`${fi+1}. ${BL[fi]}: ${call.f[fk]||''}\n`; });
+  });
+  b+='\n-------------------------';
+  document.getElementById('prev-out').textContent=b;
+  return b;
+}
+
+function copyBrief() {
+  const t=document.getElementById('prev-out').textContent;
+  navigator.clipboard.writeText(t).then(()=>toast('Copied ✓')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Copied ✓');
+  });
+}
+function copyForSlack() { copyBrief(); toast('Copied ✓ — paste into #alex-daily-brief'); }
+
+// ═══════════════════════════════════════
+// SHARE / DOWNLOAD
+// ═══════════════════════════════════════
+function downloadDashboard() {
+  const html = document.documentElement.outerHTML;
+  const blob = new Blob([html], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'gml-command-centre-' + new Date().toISOString().slice(0,10) + '.html';
+  a.click();
+  toast('Downloaded ✓ — upload as index.html to your GitHub repo');
+}
+
+function copyShareInstructions() {
+  const txt = `GML Command Centre — How to host on GitHub Pages (free, permanent link):
+
+1. Download the dashboard HTML file (click "Download latest dashboard")
+2. Upload to Google Drive: drive.google.com → New → File upload
+3. Right-click the file → Share → Change to "Anyone with the link" → Copy link
+4. Share the link — recipients click it, then Open with → Google Chrome
+5. To update: click Sync Slack on the dashboard, re-download, re-upload to Drive`;
+  navigator.clipboard.writeText(txt).then(()=>toast('Instructions copied ✓'));
+}
+
+// ═══════════════════════════════════════
+// SYNC BAR + TOAST
+// ═══════════════════════════════════════
+function showBar(type, msg) {
+  document.getElementById('sbar').innerHTML = `<div class="sbar ${type}"><div class="${type==='loading'?'spinner':''}"></div>${msg}</div>`;
+}
+function hideBar() { document.getElementById('sbar').innerHTML=''; }
+function toast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape') closeModal();
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openModal();}
+});
+
+load(); render(); initBrief();
+</script>
+</body>
+</html>
