@@ -1,0 +1,492 @@
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GetMeLinks · Command Centre</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4f1;--bg2:#ffffff;--bg3:#f0efec;--bg4:#e8e7e4;
+  --border:#e2e0db;--border2:#cccac4;
+  --ink:#1a1917;--ink2:#5c5a55;--ink3:#9c9a95;
+  --red:#c0392b;--red-l:rgba(192,57,43,0.08);
+  --amber:#b8650a;--amber-l:rgba(184,101,10,0.09);
+  --green:#2d7a4f;--green-l:rgba(45,122,79,0.09);
+  --blue:#2563a8;--blue-l:rgba(37,99,168,0.09);
+  --purple:#6b4fad;--purple-l:rgba(107,79,173,0.09);
+  --radius:10px;--radius-sm:6px;
+}
+html{background:var(--bg);color:var(--ink);font-family:'Geist',sans-serif;font-size:14px;line-height:1.6}
+body{min-height:100vh;padding:0 0 4rem}
+.share-banner{background:var(--blue-l);border-bottom:1px solid rgba(37,99,168,0.15);padding:9px 2rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.share-banner strong{font-weight:600;color:var(--blue)}
+.share-banner-text{font-size:12px;color:var(--blue);flex:1}
+.share-step{font-size:11px;background:white;border:1px solid rgba(37,99,168,0.2);border-radius:4px;padding:3px 9px;color:var(--blue)}
+.share-close{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--ink3);font-size:18px;line-height:1;padding:0 4px}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(245,244,241,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;gap:1rem;height:54px}
+.logo{font-family:'Instrument Serif',serif;font-size:18px;color:var(--ink);letter-spacing:-0.01em;white-space:nowrap}
+.logo span{color:var(--amber)}
+.topbar-tabs{display:flex;gap:2px;margin-left:1rem}
+.topbar-tab{padding:5px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--ink3);font-family:'Geist',sans-serif;transition:all .15s}
+.topbar-tab:hover{color:var(--ink2);background:var(--bg3)}
+.topbar-tab.active{background:var(--ink);color:white}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(45,122,79,0.4)}50%{opacity:.7;box-shadow:0 0 0 5px rgba(45,122,79,0)}}
+.live-label{font-size:11px;color:var(--green);font-weight:500;letter-spacing:.04em}
+.updated{font-size:11px;color:var(--ink3)}
+.btn{padding:6px 13px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;font-family:'Geist',sans-serif;transition:all .15s;border:1px solid var(--border2);background:var(--bg3);color:var(--ink2)}
+.btn:hover{background:var(--bg4);color:var(--ink)}
+.btn.primary{background:var(--amber);color:#fff;border-color:var(--amber)}
+.btn.primary:hover{opacity:.9}
+.shell{max-width:1100px;margin:0 auto;padding:2rem}
+.page{display:none}.page.active{display:block}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.5rem}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.stat-label{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px}
+.stat-val{font-size:26px;font-weight:600;line-height:1}
+.stat-val.red{color:var(--red)}.stat-val.amber{color:var(--amber)}.stat-val.green{color:var(--green)}.stat-val.blue{color:var(--blue)}.stat-val.purple{color:var(--purple)}
+.stat-sub{font-size:11px;color:var(--ink3);margin-top:4px}
+.filterbar{display:flex;align-items:center;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap}
+.filter-btn{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--ink3);font-family:'Geist',sans-serif;transition:all .15s}
+.filter-btn:hover{border-color:var(--border2);color:var(--ink2)}
+.filter-btn.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.search-wrap{margin-left:auto;position:relative}
+.search-wrap input{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 12px 6px 30px;font-size:12px;color:var(--ink);font-family:'Geist',sans-serif;width:190px;outline:none}
+.search-wrap input::placeholder{color:var(--ink3)}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:12px}
+.section-head{display:flex;align-items:center;gap:10px;margin:2rem 0 1rem}
+.section-title{font-family:'Instrument Serif',serif;font-size:20px;color:var(--ink);font-style:italic}
+.section-count{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em}
+.sc-red{background:var(--red-l);color:var(--red)}.sc-amber{background:var(--amber-l);color:var(--amber)}.sc-green{background:var(--green-l);color:var(--green)}
+.cards{display:flex;flex-direction:column;gap:8px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.card.pri-high::before{background:var(--red)}.card.pri-medium::before{background:var(--amber)}.card.pri-low::before{background:var(--blue)}
+.card:hover{border-color:var(--border2);box-shadow:0 3px 12px rgba(0,0,0,0.08)}
+.card.done{opacity:.4}.card.done .card-title{text-decoration:line-through}
+.card-top{display:flex;align-items:flex-start;gap:12px}
+.card-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .15s}
+.card-check.on{background:var(--green);border-color:var(--green)}
+.card-check svg{width:10px;height:10px}
+.card-body{flex:1;min-width:0}
+.card-meta{display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap}
+.card-client{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3)}
+.badge{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:500}
+.badge.red{background:var(--red-l);color:var(--red)}.badge.amber{background:var(--amber-l);color:var(--amber)}.badge.green{background:var(--green-l);color:var(--green)}.badge.blue{background:var(--blue-l);color:var(--blue)}.badge.purple{background:var(--purple-l);color:var(--purple)}.badge.gray{background:var(--bg3);color:var(--ink3)}
+.card-title{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:5px;line-height:1.4}
+.card-note{font-size:12px;color:var(--ink2);line-height:1.55}
+.card-links{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.card-link{font-size:11px;padding:3px 10px;border-radius:4px;border:1px solid var(--border2);color:var(--ink3);text-decoration:none;transition:all .15s;background:transparent}
+.card-link:hover{background:var(--bg4);color:var(--ink)}
+.card-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.card-date{font-size:11px;color:var(--ink3)}
+.completed-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 0;color:var(--ink3);font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;border:none;background:none;font-family:'Geist',sans-serif;border-top:1px solid var(--border);margin-top:1.5rem;width:100%}
+.completed-toggle:hover{color:var(--ink2)}
+.toggle-arrow{transition:transform .2s;display:inline-block}
+.toggle-arrow.open{transform:rotate(90deg)}
+#completed-cards{display:none}
+#completed-cards.open{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.progress-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:1.5rem}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--green));border-radius:2px;transition:width .5s ease}
+.empty{text-align:center;padding:3rem 1rem;color:var(--ink3)}
+.empty .empty-icon{font-size:2rem;margin-bottom:1rem;opacity:.4}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:28px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.12)}
+.modal h2{font-family:'Instrument Serif',serif;font-size:22px;margin-bottom:1.5rem;color:var(--ink)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:5px}
+.field input,.field textarea,.field select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:13px;color:var(--ink);font-family:'Geist',sans-serif;outline:none;transition:border-color .15s}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--border2)}
+.field input::placeholder,.field textarea::placeholder{color:var(--ink3)}
+.field textarea{resize:vertical;min-height:70px}
+.field select{appearance:none;cursor:pointer}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+/* CALL BRIEF */
+.brief-layout{display:grid;grid-template-columns:320px 1fr;gap:1.5rem;align-items:start}
+.brief-sidebar{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:sticky;top:70px}
+.brief-sidebar h3{font-family:'Instrument Serif',serif;font-size:17px;margin-bottom:14px;color:var(--ink)}
+.brief-field{margin-bottom:10px}
+.brief-field label{display:block;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin-bottom:4px}
+.brief-field input,.brief-field select,.brief-field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;font-size:12px;color:var(--ink);font-family:'Geist',sans-serif;outline:none;transition:border-color .15s}
+.brief-field input:focus,.brief-field textarea:focus{border-color:var(--border2)}
+.brief-field input::placeholder,.brief-field textarea::placeholder{color:var(--ink3)}
+.brief-field textarea{resize:vertical;min-height:55px}
+.brief-date-row{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.brief-date-row label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);white-space:nowrap}
+.brief-date-row input{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;font-size:12px;color:var(--ink);font-family:'Geist',sans-serif;outline:none;flex:1}
+.add-call-btn{width:100%;padding:8px;border-radius:var(--radius-sm);border:1px dashed var(--border2);background:transparent;font-size:12px;font-weight:500;cursor:pointer;font-family:'Geist',sans-serif;color:var(--ink3);transition:all .15s;margin-top:4px}
+.add-call-btn:hover{background:var(--bg3);color:var(--ink2)}
+.brief-call-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.call-block-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.call-block-num{font-family:'Instrument Serif',serif;font-size:16px;color:var(--ink)}
+.remove-call{background:none;border:none;cursor:pointer;color:var(--ink3);font-size:20px;line-height:1;padding:0 2px;transition:color .15s}
+.remove-call:hover{color:var(--red)}
+.brief-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.brief-preview-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-top:1.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.brief-preview-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.brief-preview-header h3{font-family:'Instrument Serif',serif;font-size:17px;color:var(--ink)}
+.brief-preview{font-family:'Geist',sans-serif;font-size:12.5px;line-height:1.8;color:var(--ink2);white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;min-height:200px}
+.template-ref{font-size:11px;color:var(--ink3);line-height:1.7;font-family:monospace;background:var(--bg3);border-radius:var(--radius-sm);padding:12px;margin-top:12px;border:1px solid var(--border)}
+/* SHARE MODAL */
+.share-option{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:10px}
+.share-option h4{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:5px}
+.share-option p,.share-option li{font-size:12px;color:var(--ink2);line-height:1.6}
+.share-option ol{padding-left:16px;margin-top:4px}
+.share-option ol li{margin-bottom:3px}
+.share-option code{font-size:11px;background:var(--bg4);padding:2px 6px;border-radius:3px;font-family:monospace}
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(10px);background:var(--ink);border-radius:var(--radius-sm);padding:10px 20px;font-size:13px;color:#fff;z-index:300;opacity:0;transition:all .3s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,0.15)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.card{animation:fadeUp .2s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){.brief-layout{grid-template-columns:1fr}}
+@media(max-width:700px){.stats{grid-template-columns:repeat(3,1fr)}.topbar{padding:0 1rem}.shell{padding:1rem}.brief-grid{grid-template-columns:1fr}}
+@media(max-width:480px){.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="share-banner" id="share-banner">
+  <div class="share-banner-text">
+    <strong>📤 Share this dashboard with anyone:</strong> &nbsp; Download the file → drag it onto <strong>app.netlify.com/drop</strong> → copy the link. Free, instant, no login needed for viewers.
+  </div>
+  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+    <span class="share-step">1. Click Export below</span>
+    <span class="share-step">2. Go to app.netlify.com/drop</span>
+    <span class="share-step">3. Drag &amp; drop</span>
+    <span class="share-step">4. Share the link</span>
+    <button class="btn" onclick="openShareModal()" style="font-size:11px;padding:4px 10px;margin-left:4px">All options</button>
+  </div>
+  <button class="share-close" onclick="document.getElementById('share-banner').style.display='none'">×</button>
+</div>
+
+<div class="topbar">
+  <div class="logo">GetMeLinks <span>·</span> Command Centre</div>
+  <div class="topbar-tabs">
+    <button class="topbar-tab active" onclick="switchPage('deliverables',this)">📋 Deliverables</button>
+    <button class="topbar-tab" onclick="switchPage('callbrief',this)">📞 Call Brief Builder</button>
+  </div>
+  <div class="topbar-right">
+    <div class="live-dot"></div>
+    <span class="live-label">LIVE</span>
+    <span class="updated" id="updated-label">Updated just now</span>
+    <button class="btn" onclick="exportData()">⬇ Export &amp; Share</button>
+    <button class="btn primary" onclick="openModal()">+ Add Task</button>
+  </div>
+</div>
+
+<!-- PAGE: DELIVERABLES -->
+<div class="shell page active" id="page-deliverables">
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Total Pending</div><div class="stat-val red" id="s-total">23</div><div class="stat-sub">active tasks</div></div>
+    <div class="stat"><div class="stat-label">ASAP</div><div class="stat-val red" id="s-asap">22</div><div class="stat-sub">due now</div></div>
+    <div class="stat"><div class="stat-label">This Week</div><div class="stat-val amber" id="s-week">1</div><div class="stat-sub">coming up</div></div>
+    <div class="stat"><div class="stat-label">Awaiting Alex</div><div class="stat-val purple" id="s-alex">14</div><div class="stat-sub">needs action</div></div>
+    <div class="stat"><div class="stat-label">Completed</div><div class="stat-val green" id="s-done">0</div><div class="stat-sub">all time</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="filterbar">
+    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('asap',this)">🔴 ASAP</button>
+    <button class="filter-btn" onclick="setFilter('week',this)">🟡 This Week</button>
+    <button class="filter-btn" onclick="setFilter('alex',this)">👤 Awaiting Alex</button>
+    <button class="filter-btn" onclick="setFilter('gail',this)">✅ Assigned to Gail</button>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Search tasks..." id="search-input" oninput="renderCards()">
+    </div>
+  </div>
+  <div id="cards-container"><div class="section-head"><div class="section-title">ASAP</div><span class="section-count sc-red">22 tasks</span></div><div class="cards"><div class="card pri-high " onclick="editCard('t1')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t1')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Jason Ibarra</span><span class="badge blue">3D Analysis</span><span class="badge purple">👤 Alex</span></div><div class="card-title">🔝 TOP PRIO: 3D analysis + updated link report (due today)</div><div class="card-note">Alex: "Top prio." 3D on pages we've built links to. Link report to Alex first. Bruno's client, $10K/mo for 7 months.</div><div class="card-links"><a class="card-link" href="https://drive.google.com/file/d/1wDvt2kg8wO_j5ruBfa4TFprx5FaRUJJE/view?usp=sharing" target="_blank" onclick="event.stopPropagation()">Link report</a><a class="card-link" href="https://docs.google.com/spreadsheets/d/1BgcdJKB_EXCL5Bs32fKgfCG4aikoNf7y8OLfps45C5k/edit?gid=275179303" target="_blank" onclick="event.stopPropagation()">Audit sheet</a><a class="card-link" href="https://getmelinks.spp.io/accounts/6099" target="_blank" onclick="event.stopPropagation()">SPP</a></div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t1')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t2')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t2')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Alex Smith (Fastmoldtesting)</span><span class="badge green">Comms</span><span class="badge purple">👤 Alex</span></div><div class="card-title">Close deal — $4k listicles</div><div class="card-note">Deals to close #1. All docs prepared by Gail.</div><div class="card-links"><a class="card-link" href="https://docs.google.com/spreadsheets/d/1fJa2lAXKYkTKP4MXiijzV9rLMA4qSI-wFC9DahPDZ0M/edit?gid=838336414" target="_blank" onclick="event.stopPropagation()">Order sheet</a><a class="card-link" href="https://fastmoldtesting.com/" target="_blank" onclick="event.stopPropagation()">Site</a><a class="card-link" href="https://docs.google.com/spreadsheets/d/1dvln3hmMYbTTydikefzIvAhjJ3fB1HZq-iASs_HOw2U/edit?gid=275179303" target="_blank" onclick="event.stopPropagation()">Audit sheet</a><a class="card-link" href="https://drive.google.com/file/d/1pByPz5vVQz7mkRrq1OlghzA52ZTyLa3a/view?usp=sharing" target="_blank" onclick="event.stopPropagation()">Link report</a></div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t2')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t3')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t3')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Eric Darby</span><span class="badge amber">Invoice</span><span class="badge green">✅ Gail</span></div><div class="card-title">Close deal — prepare new custom quote</div><div class="card-note">Deals to close #2. New custom quote needed.</div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t3')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t4')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t4')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Michael Bui (bloom10x)</span><span class="badge green">Comms</span><span class="badge green">✅ Gail</span></div><div class="card-title">Close deal — follow up today</div><div class="card-note">Deals to close #3. wholesalefashiontrends.com.</div><div class="card-links"><a class="card-link" href="https://docs.google.com/spreadsheets/d/1FpaaaCoJv6S1C8pzCKHNIUpqc6ggxkbpEF-YHRaYN8k/edit?gid=275179303" target="_blank" onclick="event.stopPropagation()">Audit sheet</a><a class="card-link" href="https://drive.google.com/file/d/1ySk0IvBus9udBYfa9kANhVtpL6SQPTsb/view?usp=sharing" target="_blank" onclick="event.stopPropagation()">Link report</a><a class="card-link" href="https://getmelinks.wayfront.com/accounts/6552" target="_blank" onclick="event.stopPropagation()">SPP</a></div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t4')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t5')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t5')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Save on Smokes</span><span class="badge blue">3D Analysis</span><span class="badge purple">👤 Alex</span></div><div class="card-title">3D analysis — 2 pages + resolve invoice issue</div><div class="card-note">3D on 2 pages. Also: client never received invoice, resend.</div><div class="card-links"><a class="card-link" href="https://getmelinks.spp.io/share/invoices/4E59086B?key=640e57706795390ef5a6f846a9023b41" target="_blank" onclick="event.stopPropagation()">Invoice</a></div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t5')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t6')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t6')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Deepak (medicaltourismco.com)</span><span class="badge blue">3D Analysis</span><span class="badge purple">👤 Alex</span></div><div class="card-title">3D analysis — 5 pages + 3D skill for team</div><div class="card-note">Run 3D on 5 pages. Send 3D Analysis Skill + export 6 link-building pages.</div><div class="card-links"><a class="card-link" href="https://www.medicaltourismco.com/" target="_blank" onclick="event.stopPropagation()">Site</a></div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t6')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t7')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t7')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Yousuf Ascend</span><span class="badge blue">3D Analysis</span><span class="badge purple">👤 Alex</span></div><div class="card-title">3D analysis — 5 pages</div><div class="card-note">Run 3D analysis on 5 pages.</div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t7')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t8')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t8')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Bailey Gibson (TBE Electrical)</span><span class="badge blue">3D Analysis</span><span class="badge purple">👤 Alex</span></div><div class="card-title">3D analysis — homepage + 4D report + tldv + SPP email</div><div class="card-note">3D on homepage. Send 4D report, tldv recording for speed fixes, email via SPP portal. ~$1k/mo, Essex UK. Next call Apr 25.</div><div class="card-links"><a class="card-link" href="https://tldv.io/app/meetings/69c178b1653a8c00130c13b0/" target="_blank" onclick="event.stopPropagation()">tldv</a></div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t8')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t9')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t9')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Jorge Dominguez</span><span class="badge blue">3D Analysis</span><span class="badge amber">⚡ Both</span></div><div class="card-title">3D analysis — homepage + 3 competitors + GSC index (call tomorrow)</div><div class="card-note">3D on homepage + competitors. Index management plan. Alex must sign NDA. $250 paid consult.</div><div class="card-links"><a class="card-link" href="https://drive.google.com/file/d/1_IAOxhl4Md0OFhene09i9vEXBfixVhUr/view?usp=sharing" target="_blank" onclick="event.stopPropagation()">Link report</a><a class="card-link" href="https://docs.google.com/spreadsheets/d/14OrqwOJGKLFttzqGZvY6aQoYi_IHeb9WTTROUIfjNb8/edit" target="_blank" onclick="event.stopPropagation()">Audit sheet</a><a class="card-link" href="https://getmelinks.spp.io/accounts/6550" target="_blank" onclick="event.stopPropagation()">SPP</a></div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t9')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t10')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t10')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Graham T (Parkman Woodworks)</span><span class="badge blue">3D Analysis</span><span class="badge purple">👤 Alex</span></div><div class="card-title">3D analysis — linked pages + new pages from client</div><div class="card-note">3D on all pages built links to + new pages client sent. Focus: conference tables, corporate furniture, dining tables.</div><div class="card-links"><a class="card-link" href="https://www.parkmanwoodworks.com/collections/custom-solid-wood-conference-tables" target="_blank" onclick="event.stopPropagation()">Conference tables</a></div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t10')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t11')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t11')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Tom Batting</span><span class="badge blue">3D Analysis</span><span class="badge purple">👤 Alex</span></div><div class="card-title">3D analysis — 5 pages + updated link report</div><div class="card-note">3D on 5 pages. Updated link report also needed.</div><div class="card-links"><a class="card-link" href="https://docs.google.com/spreadsheets/d/1_pljCgnCJfbQqQsXAgi0pypaxy2QRaYuF1LGYPAmvfE/edit?gid=275179303" target="_blank" onclick="event.stopPropagation()">Audit sheet</a><a class="card-link" href="https://drive.google.com/file/d/1YqnjyzLqc7_QiMBL16Jwymm8-xdH-fXo/view?usp=sharing" target="_blank" onclick="event.stopPropagation()">Link report</a><a class="card-link" href="https://getmelinks.spp.io/accounts/5049" target="_blank" onclick="event.stopPropagation()">SPP</a></div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t11')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t12')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t12')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Steve Laff (assileye.com)</span><span class="badge blue">3D Analysis</span><span class="badge purple">👤 Alex</span></div><div class="card-title">3D analysis — homepage + 2 pages</div><div class="card-note">3D on homepage + assileye.com/eye-care/cataract-surgery/. Client since 2023.</div><div class="card-links"><a class="card-link" href="https://docs.google.com/spreadsheets/d/1azL7hkw8KKQKaKmfn8uLn1sOtnAhx0-vXQdWsV_IALs/edit?gid=275179303" target="_blank" onclick="event.stopPropagation()">Audit sheet</a><a class="card-link" href="https://drive.google.com/file/d/1rrsY_eJBQH8tZJ8g76uakRLa93UOCfLb/view?usp=sharing" target="_blank" onclick="event.stopPropagation()">Link report</a></div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t12')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t13')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t13')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Lendforall (lendforall.ca)</span><span class="badge blue">3D Analysis</span><span class="badge purple">👤 Alex</span></div><div class="card-title">3D analysis — homepage + top 3 competitors</div><div class="card-note">Bruno's client, loan niche. Risk of churn.</div><div class="card-links"><a class="card-link" href="https://docs.google.com/spreadsheets/d/121MZPYCHqEcRW30mf2jRBTSfd2u18eRyr4fC6hUjWBo/edit?gid=275179303" target="_blank" onclick="event.stopPropagation()">Audit sheet</a><a class="card-link" href="https://drive.google.com/file/d/12VxO_hsBOzU6-lsBND93EFT1-IWMaIAs/view?usp=sharing" target="_blank" onclick="event.stopPropagation()">Link report</a></div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t13')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t14')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t14')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Joe Kattan</span><span class="badge purple">Report</span><span class="badge amber">⚡ Both</span></div><div class="card-title">Multiple reports + meeting prep — next Tuesday</div><div class="card-note">Multiple reports requested. Meeting next Tue. Kerly: local NY appraisers or nationwide? Alex to clarify. Also: inform Joe of site replacements.</div><div class="card-links"><a class="card-link" href="https://docs.google.com/spreadsheets/d/1RAkDdpP8OQQKovFFQ90V-UPM0z6Fr99a8HeYhMLzZz0/edit?gid=980804316" target="_blank" onclick="event.stopPropagation()">Order sheet</a></div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t14')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t15')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t15')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Ron Gastfreund</span><span class="badge purple">Report</span><span class="badge green">✅ Gail</span></div><div class="card-title">Run reports + anchors &amp; targets for 2 months + email client</div><div class="card-note">Run reports, choose anchor strategy, email Ron the plan. In progress.</div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t15')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t16')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t16')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Richard Lehman</span><span class="badge green">Comms</span><span class="badge green">✅ Gail</span></div><div class="card-title">Send email + invite to book update session</div><div class="card-note">Send email, invite to book update session. Client considering Resources section with localised content.</div><div class="card-links"><a class="card-link" href="https://www.bowtiegrooming.com/resources" target="_blank" onclick="event.stopPropagation()">Site resources</a><a class="card-link" href="https://tldv.io/app/clips/clip_d64b3399-c000-4d36-8cbe-e79f8fab68bb" target="_blank" onclick="event.stopPropagation()">tldv clip</a></div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t16')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t17')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t17')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Matthew (investigateSC)</span><span class="badge purple">Report</span><span class="badge green">✅ Gail</span></div><div class="card-title">Updated link report based on pages sent</div><div class="card-note">Keyword: Private Investigator Columbia SC. Awaiting GSC confirmation.</div><div class="card-links"><a class="card-link" href="https://drive.google.com/file/d/1P5O2w0b0jPQVwjTZ6FalmQrnwEsWFdkg/view?usp=sharing" target="_blank" onclick="event.stopPropagation()">Link report</a><a class="card-link" href="https://docs.google.com/spreadsheets/d/1DmSxvobN-kHx1doDDLIaSz0oqf1urPe8lyjwnQM4nNU/edit?gid=275179303" target="_blank" onclick="event.stopPropagation()">Audit sheet</a></div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t17')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t18')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t18')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Guy (New Client)</span><span class="badge amber">Invoice</span><span class="badge green">✅ Gail</span></div><div class="card-title">Mark SPP invoice as paid + kick off link order</div><div class="card-note">Stripe confirmed. Mark SPP paid manually. Link order: homepage brand anchors + internal keyword rich (one short, one long).</div><div class="card-links"><a class="card-link" href="https://getmelinks.spp.io/share/invoices/4E59086B?key=640e57706795390ef5a6f846a9023b41" target="_blank" onclick="event.stopPropagation()">SPP Invoice</a><a class="card-link" href="https://docs.google.com/spreadsheets/d/143JmVDrhohtgPKtUllyor8wI18szBmKT6_k-jzosPPQ/edit?gid=1370808423" target="_blank" onclick="event.stopPropagation()">Order Sheet</a></div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t18')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t19')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t19')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Aaron Parker</span><span class="badge amber">Invoice</span><span class="badge green">✅ Gail</span></div><div class="card-title">Prepare invoice &amp; contract — closed at $1,028/mo</div><div class="card-note">Aaron closed at $1,028/mo.</div></div><div class="card-right"><span class="card-date">2026-03-31</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t19')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t20')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t20')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Aaron Parker</span><span class="badge purple">Report</span><span class="badge purple">👤 Alex</span></div><div class="card-title">Record Loom + send 6-month quote ($1,177/mo)</div><div class="card-note">$1,177/mo · $7,062 total. 16 T1 + 7 T2 links, 3/mo. Ask Alex: approve? Velocity 3 or 4?</div><div class="card-links"><a class="card-link" href="https://tldv.io/app/meetings/69bd67a4a42bd00013766765" target="_blank" onclick="event.stopPropagation()">tldv</a><a class="card-link" href="https://drive.google.com/file/d/1uHhzSDd7dhtuoWhaTX4MUjTTjCZmBeHb/view?usp=sharing" target="_blank" onclick="event.stopPropagation()">Link report</a></div></div><div class="card-right"><span class="card-date">2026-03-30</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t20')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t22')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t22')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Dayton Cameron</span><span class="badge green">Comms</span><span class="badge green">✅ Gail</span></div><div class="card-title">Send client update — order overdue</div><div class="card-note">CBD + saturation. 3/5 links live. New TAT: next week.</div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t22')">Edit</button></div></div></div><div class="card pri-high " onclick="editCard('t23')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t23')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Matoom / Khaxsoe</span><span class="badge green">Comms</span><span class="badge green">✅ Gail</span></div><div class="card-title">Send client update — order overdue</div><div class="card-note">2/3 links live. New TAT: next week.</div></div><div class="card-right"><span class="card-date">2026-04-01</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t23')">Edit</button></div></div></div></div><div class="section-head"><div class="section-title">This Week</div><span class="section-count sc-amber">1 tasks</span></div><div class="cards"><div class="card pri-medium " onclick="editCard('t21')"><div class="card-top"><div class="card-check " onclick="event.stopPropagation();toggleDone('t21')"><svg viewBox="0 0 10 10" fill="none" stroke="#b0aea9" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"></polyline></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">Brandon</span><span class="badge purple">Report</span><span class="badge purple">👤 Alex</span></div><div class="card-title">SEO case breakdown — awaiting Alex confirmation</div><div class="card-note">~91% nofollow vs 34% competitor avg. Confirm April $15k budget.</div><div class="card-links"><a class="card-link" href="https://docs.google.com/spreadsheets/d/1E9gcpdnairBPf1SbxSdQLDYMQXfQPUOT7DSZwMaX7iA/edit?gid=0" target="_blank" onclick="event.stopPropagation()">Nofollow report</a></div></div><div class="card-right"><span class="card-date">2026-03-30</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('t21')">Edit</button></div></div></div></div></div>
+  <button class="completed-toggle" onclick="toggleCompleted()">
+    <span class="toggle-arrow" id="completed-arrow">▶</span>
+    Completed tasks (<span id="completed-count">0</span>)
+  </button>
+  <div id="completed-cards"></div>
+</div>
+
+<!-- PAGE: CALL BRIEF BUILDER -->
+<div class="shell page" id="page-callbrief">
+  <div style="margin-bottom:1.5rem">
+    <div style="font-family:'Instrument Serif',serif;font-size:26px;color:var(--ink);margin-bottom:4px">Call Brief Builder</div>
+    <div style="font-size:13px;color:var(--ink3)">Fill in the details for each call, then copy the formatted brief to post in <strong style="color:var(--ink2)">#alex-daily-brief</strong></div>
+  </div>
+  <div class="brief-layout">
+    <div>
+      <div class="brief-sidebar">
+        <h3>Settings</h3>
+        <div class="brief-date-row">
+          <label>Date</label>
+          <input type="date" id="brief-date" oninput="generateBrief()">
+        </div>
+        <button class="add-call-btn" onclick="addCall()">+ Add another call</button>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+          <div style="font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px">Template format</div>
+          <div class="template-ref">📋 Today's Call Brief — [DATE]<br>-------------------------<br>Call N — [Name] · [Time]<br><br>1. Client name:<br>2. Type of call:<br>3. Time:<br>4. Site:<br>5. Link report:<br>6. Audit sheet:<br>7. Order sheet:<br>8. SPP Link:<br>9. tldv link:<br>10. Notes:<br>-------------------------</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div id="call-blocks">
+    <div class="brief-call-block">
+      <div class="call-block-header">
+        <div class="call-block-num">Call 1</div>
+        <button class="remove-call" onclick="removeCall('c0')" title="Remove">×</button>
+      </div>
+      <div class="brief-grid">
+        <div class="brief-field"><label>1. Client name</label><input type="text" value="Rony Islam" placeholder="" oninput="calls.find(c=&gt;c.id==='c0').fields['client-name']=this.value;generateBrief()"></div><div class="brief-field"><label>2. Type of call</label><input type="text" value="Link Building Strategy" placeholder="" oninput="calls.find(c=&gt;c.id==='c0').fields['call-type']=this.value;generateBrief()"></div><div class="brief-field"><label>3. Time</label><input type="text" value="18:30AM KL Time" placeholder="" oninput="calls.find(c=&gt;c.id==='c0').fields['call-time']=this.value;generateBrief()"></div><div class="brief-field"><label>4. Site</label><input type="text" value="enorsia.com" placeholder="" oninput="calls.find(c=&gt;c.id==='c0').fields['site']=this.value;generateBrief()"></div><div class="brief-field" style=""><label>5. Link report</label><textarea placeholder="" oninput="calls.find(c=&gt;c.id==='c0').fields['link-report']=this.value;generateBrief()"></textarea></div><div class="brief-field" style=""><label>6. Audit sheet</label><textarea placeholder="" oninput="calls.find(c=&gt;c.id==='c0').fields['audit-sheet']=this.value;generateBrief()"></textarea></div><div class="brief-field" style=""><label>7. Order sheet</label><textarea placeholder="" oninput="calls.find(c=&gt;c.id==='c0').fields['order-sheet']=this.value;generateBrief()"></textarea></div><div class="brief-field"><label>8. SPP Link</label><input type="text" value="" placeholder="" oninput="calls.find(c=&gt;c.id==='c0').fields['spp-link']=this.value;generateBrief()"></div><div class="brief-field"><label>9. tldv link</label><input type="text" value="" placeholder="" oninput="calls.find(c=&gt;c.id==='c0').fields['tldv-link']=this.value;generateBrief()"></div><div class="brief-field" style="grid-column:1/-1"><label>10. Notes</label><textarea placeholder="" oninput="calls.find(c=&gt;c.id==='c0').fields['notes']=this.value;generateBrief()">New client — not in database yet. Please add to #client-database.</textarea></div>
+    </div>
+  
+    <div class="brief-call-block">
+      <div class="call-block-header">
+        <div class="call-block-num">Call 2</div>
+        <button class="remove-call" onclick="removeCall('c1')" title="Remove">×</button>
+      </div>
+      <div class="brief-grid">
+        <div class="brief-field"><label>1. Client name</label><input type="text" value="Jason Ibarra" placeholder="" oninput="calls.find(c=&gt;c.id==='c1').fields['client-name']=this.value;generateBrief()"></div><div class="brief-field"><label>2. Type of call</label><input type="text" value="Link Consult" placeholder="" oninput="calls.find(c=&gt;c.id==='c1').fields['call-type']=this.value;generateBrief()"></div><div class="brief-field"><label>3. Time</label><input type="text" value="22:30AM KL Time" placeholder="" oninput="calls.find(c=&gt;c.id==='c1').fields['call-time']=this.value;generateBrief()"></div><div class="brief-field"><label>4. Site</label><input type="text" value="http://coastalmovingservices.com" placeholder="" oninput="calls.find(c=&gt;c.id==='c1').fields['site']=this.value;generateBrief()"></div><div class="brief-field" style=""><label>5. Link report</label><textarea placeholder="" oninput="calls.find(c=&gt;c.id==='c1').fields['link-report']=this.value;generateBrief()">https://drive.google.com/file/d/1wDvt2kg8wO_j5ruBfa4TFprx5FaRUJJE/view?usp=sharing</textarea></div><div class="brief-field" style=""><label>6. Audit sheet</label><textarea placeholder="" oninput="calls.find(c=&gt;c.id==='c1').fields['audit-sheet']=this.value;generateBrief()">https://docs.google.com/spreadsheets/d/1BgcdJKB_EXCL5Bs32fKgfCG4aikoNf7y8OLfps45C5k/edit?gid=275179303</textarea></div><div class="brief-field" style=""><label>7. Order sheet</label><textarea placeholder="" oninput="calls.find(c=&gt;c.id==='c1').fields['order-sheet']=this.value;generateBrief()">https://docs.google.com/spreadsheets/d/1mWUVuJFmy2cWX7bbb2w-ouW2X4ne4LxpBHuDWV7eUmA/edit?gid=82697098</textarea></div><div class="brief-field"><label>8. SPP Link</label><input type="text" value="https://getmelinks.spp.io/accounts/6099" placeholder="" oninput="calls.find(c=&gt;c.id==='c1').fields['spp-link']=this.value;generateBrief()"></div><div class="brief-field"><label>9. tldv link</label><input type="text" value="" placeholder="" oninput="calls.find(c=&gt;c.id==='c1').fields['tldv-link']=this.value;generateBrief()"></div><div class="brief-field" style="grid-column:1/-1"><label>10. Notes</label><textarea placeholder="" oninput="calls.find(c=&gt;c.id==='c1').fields['notes']=this.value;generateBrief()">Bruno's client. Agency client — $10K/month for 7 months. Specific campaign guidelines on website type ratios.</textarea></div>
+    </div>
+  
+    <div class="brief-call-block">
+      <div class="call-block-header">
+        <div class="call-block-num">Call 3</div>
+        <button class="remove-call" onclick="removeCall('c2')" title="Remove">×</button>
+      </div>
+      <div class="brief-grid">
+        <div class="brief-field"><label>1. Client name</label><input type="text" value="Luis from pixa.com" placeholder="" oninput="calls.find(c=&gt;c.id==='c2').fields['client-name']=this.value;generateBrief()"></div><div class="brief-field"><label>2. Type of call</label><input type="text" value="" placeholder="" oninput="calls.find(c=&gt;c.id==='c2').fields['call-type']=this.value;generateBrief()"></div><div class="brief-field"><label>3. Time</label><input type="text" value="2:00AM KL Time" placeholder="" oninput="calls.find(c=&gt;c.id==='c2').fields['call-time']=this.value;generateBrief()"></div><div class="brief-field"><label>4. Site</label><input type="text" value="" placeholder="" oninput="calls.find(c=&gt;c.id==='c2').fields['site']=this.value;generateBrief()"></div><div class="brief-field" style=""><label>5. Link report</label><textarea placeholder="" oninput="calls.find(c=&gt;c.id==='c2').fields['link-report']=this.value;generateBrief()"></textarea></div><div class="brief-field" style=""><label>6. Audit sheet</label><textarea placeholder="" oninput="calls.find(c=&gt;c.id==='c2').fields['audit-sheet']=this.value;generateBrief()"></textarea></div><div class="brief-field" style=""><label>7. Order sheet</label><textarea placeholder="" oninput="calls.find(c=&gt;c.id==='c2').fields['order-sheet']=this.value;generateBrief()"></textarea></div><div class="brief-field"><label>8. SPP Link</label><input type="text" value="" placeholder="" oninput="calls.find(c=&gt;c.id==='c2').fields['spp-link']=this.value;generateBrief()"></div><div class="brief-field"><label>9. tldv link</label><input type="text" value="" placeholder="" oninput="calls.find(c=&gt;c.id==='c2').fields['tldv-link']=this.value;generateBrief()"></div><div class="brief-field" style="grid-column:1/-1"><label>10. Notes</label><textarea placeholder="" oninput="calls.find(c=&gt;c.id==='c2').fields['notes']=this.value;generateBrief()">New client</textarea></div>
+    </div>
+  </div></div></div></div>
+      <div class="brief-preview-wrap">
+        <div class="brief-preview-header">
+          <h3>Generated brief</h3>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="copyBrief()">Copy to clipboard</button>
+            <button class="btn primary" onclick="copyAndShowSlack()">Copy for #alex-daily-brief</button>
+          </div>
+        </div>
+        <div class="brief-preview" id="brief-preview">📋 Today's Call Brief — 01 Apr 2026
+
+-------------------------
+
+Call 1 — Rony Islam · 18:30AM KL Time
+
+1. Client name: Rony Islam
+2. Type of call: Link Building Strategy
+3. Time: 18:30AM KL Time
+4. Site: enorsia.com
+5. Link report: 
+6. Audit sheet: 
+7. Order sheet: 
+8. SPP Link: 
+9. tldv link: 
+10. Notes: New client — not in database yet. Please add to #client-database.
+
+-------------------------
+
+Call 2 — Jason Ibarra · 22:30AM KL Time
+
+1. Client name: Jason Ibarra
+2. Type of call: Link Consult
+3. Time: 22:30AM KL Time
+4. Site: http://coastalmovingservices.com
+5. Link report: https://drive.google.com/file/d/1wDvt2kg8wO_j5ruBfa4TFprx5FaRUJJE/view?usp=sharing
+6. Audit sheet: https://docs.google.com/spreadsheets/d/1BgcdJKB_EXCL5Bs32fKgfCG4aikoNf7y8OLfps45C5k/edit?gid=275179303
+7. Order sheet: https://docs.google.com/spreadsheets/d/1mWUVuJFmy2cWX7bbb2w-ouW2X4ne4LxpBHuDWV7eUmA/edit?gid=82697098
+8. SPP Link: https://getmelinks.spp.io/accounts/6099
+9. tldv link: 
+10. Notes: Bruno's client. Agency client — $10K/month for 7 months. Specific campaign guidelines on website type ratios.
+
+-------------------------
+
+Call 3 — Luis from pixa.com · 2:00AM KL Time
+
+1. Client name: Luis from pixa.com
+2. Type of call: 
+3. Time: 2:00AM KL Time
+4. Site: 
+5. Link report: 
+6. Audit sheet: 
+7. Order sheet: 
+8. SPP Link: 
+9. tldv link: 
+10. Notes: New client
+
+-------------------------</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT TASK MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2 id="modal-title">Edit Task</h2>
+    <div class="field-row">
+      <div class="field"><label>Client name</label><input type="text" id="f-client" placeholder="e.g. Aaron Parker"></div>
+      <div class="field"><label>Priority</label><select id="f-priority"><option value="high">🔴 ASAP</option><option value="medium">🟡 This Week</option><option value="low">🔵 Coming Up</option></select></div>
+    </div>
+    <div class="field"><label>Task title</label><input type="text" id="f-title" placeholder="e.g. Send quote + Loom recording"></div>
+    <div class="field"><label>Notes / details</label><textarea id="f-notes" placeholder="Context, ask, key details..."></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>Assigned to</label><select id="f-assigned"><option value="gail">Gail</option><option value="alex">Alex</option><option value="both">Both</option><option value="team">Team</option></select></div>
+      <div class="field"><label>Category</label><select id="f-category"><option value="invoice">Invoice / Payment</option><option value="order">Link Order</option><option value="report">Report / Analysis</option><option value="comms">Client Comms</option><option value="contract">Contract / NDA</option><option value="3d">3D Analysis</option><option value="call">Call Prep</option><option value="other">Other</option></select></div>
+    </div>
+    <div class="field"><label>Links (Label|URL, comma-separated)</label><input type="text" id="f-links" placeholder="Link report|https://drive.google.com/..., SPP|https://..."></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="saveCard()">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHARE MODAL -->
+<div class="modal-overlay" id="share-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <h2>📤 How to share this dashboard</h2>
+    <div class="share-option">
+      <h4>⚡ Option 1 — Netlify Drop (easiest, free, instant)</h4>
+      <p>No account needed. Anyone with the link can view the full dashboard in their browser.</p>
+      <ol>
+        <li>Click <strong>"⬇ Export &amp; Share"</strong> in the top bar — downloads the HTML file</li>
+        <li>Go to <strong>app.netlify.com/drop</strong> in your browser</li>
+        <li>Drag and drop the HTML file onto the page</li>
+        <li>Netlify gives you a link — copy and share it with anyone</li>
+      </ol>
+    </div>
+    <div class="share-option">
+      <h4>📁 Option 2 — GitHub Pages (free, permanent link)</h4>
+      <p>Best for a stable link that doesn't change.</p>
+      <ol>
+        <li>Create a free account at <strong>github.com</strong></li>
+        <li>Create a new repository, upload the HTML file as <code>index.html</code></li>
+        <li>Go to Settings → Pages → set source to main branch</li>
+        <li>Your link: <code>yourusername.github.io/repo-name</code></li>
+      </ol>
+    </div>
+    <div class="share-option">
+      <h4>📧 Option 3 — Send the file directly</h4>
+      <p>The HTML file works 100% offline. Email or WhatsApp it — the recipient just opens it in any browser. All tasks and data are embedded inside the file. To share updates, re-export and re-share.</p>
+    </div>
+    <div class="share-option" style="background:var(--amber-l);border-color:rgba(184,101,10,0.2)">
+      <h4>💡 Tip — keeping everyone in sync</h4>
+      <p>Each person who opens the file sees the same task list, but their check-offs are saved only in their own browser. To push updates (new tasks from Alex), re-export and re-share the updated file. This takes about 10 seconds.</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="document.getElementById('share-modal').classList.remove('open')">Close</button>
+      <button class="btn primary" onclick="exportData()">⬇ Download file now</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY='gml_v4';
+let tasks=[],editingId=null,currentFilter='all';
+
+const defaultTasks=[
+  {id:'t1',client:'Jason Ibarra',title:'🔝 TOP PRIO: 3D analysis + updated link report (due today)',notes:'Alex: "Top prio." 3D on pages we\'ve built links to. Link report to Alex first. Bruno\'s client, $10K/mo for 7 months.',priority:'high',assigned:'alex',category:'3d',links:[{label:'Link report',url:'https://drive.google.com/file/d/1wDvt2kg8wO_j5ruBfa4TFprx5FaRUJJE/view?usp=sharing'},{label:'Audit sheet',url:'https://docs.google.com/spreadsheets/d/1BgcdJKB_EXCL5Bs32fKgfCG4aikoNf7y8OLfps45C5k/edit?gid=275179303'},{label:'SPP',url:'https://getmelinks.spp.io/accounts/6099'}],done:false,created:'2026-04-01'},
+  {id:'t2',client:'Alex Smith (Fastmoldtesting)',title:'Close deal — $4k listicles',notes:'Deals to close #1. All docs prepared by Gail.',priority:'high',assigned:'alex',category:'comms',links:[{label:'Order sheet',url:'https://docs.google.com/spreadsheets/d/1fJa2lAXKYkTKP4MXiijzV9rLMA4qSI-wFC9DahPDZ0M/edit?gid=838336414'},{label:'Site',url:'https://fastmoldtesting.com/'},{label:'Audit sheet',url:'https://docs.google.com/spreadsheets/d/1dvln3hmMYbTTydikefzIvAhjJ3fB1HZq-iASs_HOw2U/edit?gid=275179303'},{label:'Link report',url:'https://drive.google.com/file/d/1pByPz5vVQz7mkRrq1OlghzA52ZTyLa3a/view?usp=sharing'}],done:false,created:'2026-04-01'},
+  {id:'t3',client:'Eric Darby',title:'Close deal — prepare new custom quote',notes:'Deals to close #2. New custom quote needed.',priority:'high',assigned:'gail',category:'invoice',links:[],done:false,created:'2026-04-01'},
+  {id:'t4',client:'Michael Bui (bloom10x)',title:'Close deal — follow up today',notes:'Deals to close #3. wholesalefashiontrends.com.',priority:'high',assigned:'gail',category:'comms',links:[{label:'Audit sheet',url:'https://docs.google.com/spreadsheets/d/1FpaaaCoJv6S1C8pzCKHNIUpqc6ggxkbpEF-YHRaYN8k/edit?gid=275179303'},{label:'Link report',url:'https://drive.google.com/file/d/1ySk0IvBus9udBYfa9kANhVtpL6SQPTsb/view?usp=sharing'},{label:'SPP',url:'https://getmelinks.wayfront.com/accounts/6552'}],done:false,created:'2026-04-01'},
+  {id:'t5',client:'Save on Smokes',title:'3D analysis — 2 pages + resolve invoice issue',notes:'3D on 2 pages. Also: client never received invoice, resend.',priority:'high',assigned:'alex',category:'3d',links:[{label:'Invoice',url:'https://getmelinks.spp.io/share/invoices/4E59086B?key=640e57706795390ef5a6f846a9023b41'}],done:false,created:'2026-04-01'},
+  {id:'t6',client:'Deepak (medicaltourismco.com)',title:'3D analysis — 5 pages + 3D skill for team',notes:'Run 3D on 5 pages. Send 3D Analysis Skill + export 6 link-building pages.',priority:'high',assigned:'alex',category:'3d',links:[{label:'Site',url:'https://www.medicaltourismco.com/'}],done:false,created:'2026-04-01'},
+  {id:'t7',client:'Yousuf Ascend',title:'3D analysis — 5 pages',notes:'Run 3D analysis on 5 pages.',priority:'high',assigned:'alex',category:'3d',links:[],done:false,created:'2026-04-01'},
+  {id:'t8',client:'Bailey Gibson (TBE Electrical)',title:'3D analysis — homepage + 4D report + tldv + SPP email',notes:'3D on homepage. Send 4D report, tldv recording for speed fixes, email via SPP portal. ~$1k/mo, Essex UK. Next call Apr 25.',priority:'high',assigned:'alex',category:'3d',links:[{label:'tldv',url:'https://tldv.io/app/meetings/69c178b1653a8c00130c13b0/'}],done:false,created:'2026-04-01'},
+  {id:'t9',client:'Jorge Dominguez',title:'3D analysis — homepage + 3 competitors + GSC index (call tomorrow)',notes:'3D on homepage + competitors. Index management plan. Alex must sign NDA. $250 paid consult.',priority:'high',assigned:'both',category:'3d',links:[{label:'Link report',url:'https://drive.google.com/file/d/1_IAOxhl4Md0OFhene09i9vEXBfixVhUr/view?usp=sharing'},{label:'Audit sheet',url:'https://docs.google.com/spreadsheets/d/14OrqwOJGKLFttzqGZvY6aQoYi_IHeb9WTTROUIfjNb8/edit'},{label:'SPP',url:'https://getmelinks.spp.io/accounts/6550'}],done:false,created:'2026-04-01'},
+  {id:'t10',client:'Graham T (Parkman Woodworks)',title:'3D analysis — linked pages + new pages from client',notes:'3D on all pages built links to + new pages client sent. Focus: conference tables, corporate furniture, dining tables.',priority:'high',assigned:'alex',category:'3d',links:[{label:'Conference tables',url:'https://www.parkmanwoodworks.com/collections/custom-solid-wood-conference-tables'}],done:false,created:'2026-04-01'},
+  {id:'t11',client:'Tom Batting',title:'3D analysis — 5 pages + updated link report',notes:'3D on 5 pages. Updated link report also needed.',priority:'high',assigned:'alex',category:'3d',links:[{label:'Audit sheet',url:'https://docs.google.com/spreadsheets/d/1_pljCgnCJfbQqQsXAgi0pypaxy2QRaYuF1LGYPAmvfE/edit?gid=275179303'},{label:'Link report',url:'https://drive.google.com/file/d/1YqnjyzLqc7_QiMBL16Jwymm8-xdH-fXo/view?usp=sharing'},{label:'SPP',url:'https://getmelinks.spp.io/accounts/5049'}],done:false,created:'2026-04-01'},
+  {id:'t12',client:'Steve Laff (assileye.com)',title:'3D analysis — homepage + 2 pages',notes:'3D on homepage + assileye.com/eye-care/cataract-surgery/. Client since 2023.',priority:'high',assigned:'alex',category:'3d',links:[{label:'Audit sheet',url:'https://docs.google.com/spreadsheets/d/1azL7hkw8KKQKaKmfn8uLn1sOtnAhx0-vXQdWsV_IALs/edit?gid=275179303'},{label:'Link report',url:'https://drive.google.com/file/d/1rrsY_eJBQH8tZJ8g76uakRLa93UOCfLb/view?usp=sharing'}],done:false,created:'2026-04-01'},
+  {id:'t13',client:'Lendforall (lendforall.ca)',title:'3D analysis — homepage + top 3 competitors',notes:'Bruno\'s client, loan niche. Risk of churn.',priority:'high',assigned:'alex',category:'3d',links:[{label:'Audit sheet',url:'https://docs.google.com/spreadsheets/d/121MZPYCHqEcRW30mf2jRBTSfd2u18eRyr4fC6hUjWBo/edit?gid=275179303'},{label:'Link report',url:'https://drive.google.com/file/d/12VxO_hsBOzU6-lsBND93EFT1-IWMaIAs/view?usp=sharing'}],done:false,created:'2026-04-01'},
+  {id:'t14',client:'Joe Kattan',title:'Multiple reports + meeting prep — next Tuesday',notes:'Multiple reports requested. Meeting next Tue. Kerly: local NY appraisers or nationwide? Alex to clarify. Also: inform Joe of site replacements.',priority:'high',assigned:'both',category:'report',links:[{label:'Order sheet',url:'https://docs.google.com/spreadsheets/d/1RAkDdpP8OQQKovFFQ90V-UPM0z6Fr99a8HeYhMLzZz0/edit?gid=980804316'}],done:false,created:'2026-04-01'},
+  {id:'t15',client:'Ron Gastfreund',title:'Run reports + anchors & targets for 2 months + email client',notes:'Run reports, choose anchor strategy, email Ron the plan. In progress.',priority:'high',assigned:'gail',category:'report',links:[],done:false,created:'2026-04-01'},
+  {id:'t16',client:'Richard Lehman',title:'Send email + invite to book update session',notes:'Send email, invite to book update session. Client considering Resources section with localised content.',priority:'high',assigned:'gail',category:'comms',links:[{label:'Site resources',url:'https://www.bowtiegrooming.com/resources'},{label:'tldv clip',url:'https://tldv.io/app/clips/clip_d64b3399-c000-4d36-8cbe-e79f8fab68bb'}],done:false,created:'2026-04-01'},
+  {id:'t17',client:'Matthew (investigateSC)',title:'Updated link report based on pages sent',notes:'Keyword: Private Investigator Columbia SC. Awaiting GSC confirmation.',priority:'high',assigned:'gail',category:'report',links:[{label:'Link report',url:'https://drive.google.com/file/d/1P5O2w0b0jPQVwjTZ6FalmQrnwEsWFdkg/view?usp=sharing'},{label:'Audit sheet',url:'https://docs.google.com/spreadsheets/d/1DmSxvobN-kHx1doDDLIaSz0oqf1urPe8lyjwnQM4nNU/edit?gid=275179303'}],done:false,created:'2026-04-01'},
+  {id:'t18',client:'Guy (New Client)',title:'Mark SPP invoice as paid + kick off link order',notes:'Stripe confirmed. Mark SPP paid manually. Link order: homepage brand anchors + internal keyword rich (one short, one long).',priority:'high',assigned:'gail',category:'invoice',links:[{label:'SPP Invoice',url:'https://getmelinks.spp.io/share/invoices/4E59086B?key=640e57706795390ef5a6f846a9023b41'},{label:'Order Sheet',url:'https://docs.google.com/spreadsheets/d/143JmVDrhohtgPKtUllyor8wI18szBmKT6_k-jzosPPQ/edit?gid=1370808423'}],done:false,created:'2026-04-01'},
+  {id:'t19',client:'Aaron Parker',title:'Prepare invoice & contract — closed at $1,028/mo',notes:'Aaron closed at $1,028/mo.',priority:'high',assigned:'gail',category:'invoice',links:[],done:false,created:'2026-03-31'},
+  {id:'t20',client:'Aaron Parker',title:'Record Loom + send 6-month quote ($1,177/mo)',notes:'$1,177/mo · $7,062 total. 16 T1 + 7 T2 links, 3/mo. Ask Alex: approve? Velocity 3 or 4?',priority:'high',assigned:'alex',category:'report',links:[{label:'tldv',url:'https://tldv.io/app/meetings/69bd67a4a42bd00013766765'},{label:'Link report',url:'https://drive.google.com/file/d/1uHhzSDd7dhtuoWhaTX4MUjTTjCZmBeHb/view?usp=sharing'}],done:false,created:'2026-03-30'},
+  {id:'t21',client:'Brandon',title:'SEO case breakdown — awaiting Alex confirmation',notes:'~91% nofollow vs 34% competitor avg. Confirm April $15k budget.',priority:'medium',assigned:'alex',category:'report',links:[{label:'Nofollow report',url:'https://docs.google.com/spreadsheets/d/1E9gcpdnairBPf1SbxSdQLDYMQXfQPUOT7DSZwMaX7iA/edit?gid=0'}],done:false,created:'2026-03-30'},
+  {id:'t22',client:'Dayton Cameron',title:'Send client update — order overdue',notes:'CBD + saturation. 3/5 links live. New TAT: next week.',priority:'high',assigned:'gail',category:'comms',links:[],done:false,created:'2026-04-01'},
+  {id:'t23',client:'Matoom / Khaxsoe',title:'Send client update — order overdue',notes:'2/3 links live. New TAT: next week.',priority:'high',assigned:'gail',category:'comms',links:[],done:false,created:'2026-04-01'},
+];
+
+function loadTasks(){try{const r=localStorage.getItem(STORAGE_KEY);if(r){tasks=JSON.parse(r);}else{tasks=[...defaultTasks];saveTasks();}}catch(e){tasks=[...defaultTasks];}}
+function saveTasks(){localStorage.setItem(STORAGE_KEY,JSON.stringify(tasks));document.getElementById('updated-label').textContent='Updated just now';}
+function switchPage(id,btn){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.topbar-tab').forEach(b=>b.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');btn.classList.add('active');}
+function setFilter(f,btn){currentFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderCards();}
+function getFiltered(){const q=(document.getElementById('search-input').value||'').toLowerCase();return tasks.filter(t=>{if(t.done)return false;if(q&&!t.title.toLowerCase().includes(q)&&!t.client.toLowerCase().includes(q)&&!(t.notes||'').toLowerCase().includes(q))return false;if(currentFilter==='all')return true;if(currentFilter==='asap')return t.priority==='high';if(currentFilter==='week')return t.priority==='medium';if(currentFilter==='alex')return t.assigned==='alex'||t.assigned==='both';if(currentFilter==='gail')return t.assigned==='gail'||t.assigned==='both';return true;});}
+function catBadge(c){const m={invoice:['Invoice','amber'],order:['Link Order','blue'],report:['Report','purple'],comms:['Comms','green'],contract:['Contract','red'],'3d':['3D Analysis','blue'],call:['Call Prep','green'],other:['Other','gray']};const[l,col]=m[c]||['Other','gray'];return`<span class="badge ${col}">${l}</span>`;}
+function asnBadge(a){if(a==='alex')return'<span class="badge purple">👤 Alex</span>';if(a==='gail')return'<span class="badge green">✅ Gail</span>';if(a==='both')return'<span class="badge amber">⚡ Both</span>';return'<span class="badge gray">Team</span>';}
+function cardHTML(t){const ll=t.links&&t.links.length?`<div class="card-links">${t.links.map(l=>`<a class="card-link" href="${l.url}" target="_blank" onclick="event.stopPropagation()">${l.label}</a>`).join('')}</div>`:'';const pc=t.priority==='high'?'high':t.priority==='medium'?'medium':'low';return`<div class="card pri-${pc} ${t.done?'done':''}" onclick="editCard('${t.id}')"><div class="card-top"><div class="card-check ${t.done?'on':''}" onclick="event.stopPropagation();toggleDone('${t.id}')"><svg viewBox="0 0 10 10" fill="none" stroke="${t.done?'#fff':'#b0aea9'}" stroke-width="1.8"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div><div class="card-body"><div class="card-meta"><span class="card-client">${t.client}</span>${catBadge(t.category)}${asnBadge(t.assigned)}</div><div class="card-title">${t.title}</div>${t.notes?`<div class="card-note">${t.notes.length>160?t.notes.slice(0,160)+'…':t.notes}</div>`:''}${ll}</div><div class="card-right"><span class="card-date">${t.created||''}</span><button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();editCard('${t.id}')">Edit</button></div></div></div>`;}
+function renderCards(){const f=getFiltered(),done=tasks.filter(t=>t.done),asap=f.filter(t=>t.priority==='high'),week=f.filter(t=>t.priority==='medium'),low=f.filter(t=>t.priority==='low');document.getElementById('s-total').textContent=tasks.filter(t=>!t.done).length;document.getElementById('s-asap').textContent=tasks.filter(t=>!t.done&&t.priority==='high').length;document.getElementById('s-week').textContent=tasks.filter(t=>!t.done&&t.priority==='medium').length;document.getElementById('s-alex').textContent=tasks.filter(t=>!t.done&&(t.assigned==='alex'||t.assigned==='both')).length;document.getElementById('s-done').textContent=done.length;document.getElementById('completed-count').textContent=done.length;const pct=tasks.length>0?Math.round(done.length/tasks.length*100):0;document.getElementById('progress-fill').style.width=pct+'%';let h='';if(f.length===0){h='<div class="empty"><div class="empty-icon">✓</div><p>No tasks match.</p></div>';}else{if(asap.length)h+=`<div class="section-head"><div class="section-title">ASAP</div><span class="section-count sc-red">${asap.length} tasks</span></div><div class="cards">${asap.map(cardHTML).join('')}</div>`;if(week.length)h+=`<div class="section-head"><div class="section-title">This Week</div><span class="section-count sc-amber">${week.length} tasks</span></div><div class="cards">${week.map(cardHTML).join('')}</div>`;if(low.length)h+=`<div class="section-head"><div class="section-title">Coming Up</div><span class="section-count sc-green">${low.length} tasks</span></div><div class="cards">${low.map(cardHTML).join('')}</div>`;}document.getElementById('cards-container').innerHTML=h;document.getElementById('completed-cards').innerHTML=done.length?`<div class="cards">${done.map(cardHTML).join('')}</div>`:'';}
+function toggleDone(id){const t=tasks.find(x=>x.id===id);if(t){t.done=!t.done;saveTasks();renderCards();showToast(t.done?'Marked complete ✓':'Moved back to pending');}}
+function toggleCompleted(){const el=document.getElementById('completed-cards');const ar=document.getElementById('completed-arrow');el.classList.toggle('open');ar.classList.toggle('open');}
+function openModal(id=null){editingId=id;const mo=document.getElementById('modal');if(id){const t=tasks.find(x=>x.id===id);document.getElementById('modal-title').textContent='Edit Task';document.getElementById('f-client').value=t.client;document.getElementById('f-title').value=t.title;document.getElementById('f-notes').value=t.notes||'';document.getElementById('f-priority').value=t.priority;document.getElementById('f-assigned').value=t.assigned;document.getElementById('f-category').value=t.category;document.getElementById('f-links').value=(t.links||[]).map(l=>`${l.label}|${l.url}`).join(', ');}else{document.getElementById('modal-title').textContent='Add Deliverable';['f-client','f-title','f-notes','f-links'].forEach(i=>document.getElementById(i).value='');document.getElementById('f-priority').value='high';document.getElementById('f-assigned').value='gail';document.getElementById('f-category').value='other';}mo.classList.add('open');}
+function editCard(id){openModal(id);}
+function closeModal(){document.getElementById('modal').classList.remove('open');editingId=null;}
+function saveCard(){const client=document.getElementById('f-client').value.trim(),title=document.getElementById('f-title').value.trim();if(!client||!title){showToast('Client and title are required');return;}const lr=document.getElementById('f-links').value.trim();const links=lr?lr.split(',').map(s=>{const[label,...rest]=s.trim().split('|');return{label:label.trim(),url:(rest.join('|')||'').trim()};}).filter(l=>l.url):[];const now=new Date();const ds=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;if(editingId){const t=tasks.find(x=>x.id===editingId);Object.assign(t,{client,title,notes:document.getElementById('f-notes').value.trim(),priority:document.getElementById('f-priority').value,assigned:document.getElementById('f-assigned').value,category:document.getElementById('f-category').value,links});}else{tasks.unshift({id:'t'+Date.now(),client,title,notes:document.getElementById('f-notes').value.trim(),priority:document.getElementById('f-priority').value,assigned:document.getElementById('f-assigned').value,category:document.getElementById('f-category').value,links,done:false,created:ds});}saveTasks();renderCards();closeModal();showToast(editingId?'Task updated':'Task added ✓');}
+function exportData(){const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='gml-command-centre-'+new Date().toISOString().slice(0,10)+'.html';a.click();showToast('Downloaded ✓ — drag it to app.netlify.com/drop to share');}
+function openShareModal(){document.getElementById('share-modal').classList.add('open');}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+
+// ═══ CALL BRIEF ═══
+let calls=[];
+const F=['client-name','call-type','call-time','site','link-report','audit-sheet','order-sheet','spp-link','tldv-link','notes'];
+const FL=['Client name','Type of call','Time','Site','Link report','Audit sheet','Order sheet','SPP Link','tldv link','Notes'];
+
+function initBrief(){
+  const d=new Date();
+  document.getElementById('brief-date').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  // Pre-fill today's calls from #alex-daily-brief data
+  const todayCalls=[
+    {client:'Rony Islam',time:'18:30AM KL Time',type:'Link Building Strategy',site:'enorsia.com',notes:'New client — not in database yet. Please add to #client-database.'},
+    {client:'Jason Ibarra',time:'22:30AM KL Time',type:'Link Consult',site:'http://coastalmovingservices.com','link-report':'https://drive.google.com/file/d/1wDvt2kg8wO_j5ruBfa4TFprx5FaRUJJE/view?usp=sharing','audit-sheet':'https://docs.google.com/spreadsheets/d/1BgcdJKB_EXCL5Bs32fKgfCG4aikoNf7y8OLfps45C5k/edit?gid=275179303','order-sheet':'https://docs.google.com/spreadsheets/d/1mWUVuJFmy2cWX7bbb2w-ouW2X4ne4LxpBHuDWV7eUmA/edit?gid=82697098','spp-link':'https://getmelinks.spp.io/accounts/6099',notes:"Bruno's client. Agency client — $10K/month for 7 months. Specific campaign guidelines on website type ratios."},
+    {client:'Luis from pixa.com',time:'2:00AM KL Time',type:'',site:'',notes:'New client'},
+  ];
+  calls=todayCalls.map((c,i)=>({id:'c'+i,fields:{'client-name':c.client,'call-type':c.type||'','call-time':c.time,'site':c.site||'','link-report':c['link-report']||'','audit-sheet':c['audit-sheet']||'','order-sheet':c['order-sheet']||'','spp-link':c['spp-link']||'','tldv-link':c['tldv-link']||'','notes':c.notes||''}}));
+  renderCallBlocks();
+}
+
+function addCall(){calls.push({id:'c'+Date.now(),fields:{}});renderCallBlocks();}
+function removeCall(id){calls=calls.filter(c=>c.id!==id);renderCallBlocks();}
+
+function renderCallBlocks(){
+  document.getElementById('call-blocks').innerHTML=calls.map((call,idx)=>`
+    <div class="brief-call-block">
+      <div class="call-block-header">
+        <div class="call-block-num">Call ${idx+1}</div>
+        ${calls.length>1?`<button class="remove-call" onclick="removeCall('${call.id}')" title="Remove">×</button>`:''}
+      </div>
+      <div class="brief-grid">
+        ${F.map((f,fi)=>{const v=(call.fields[f]||'').replace(/"/g,'&quot;');const isTA=f==='notes'||f==='link-report'||f==='audit-sheet'||f==='order-sheet';if(isTA)return`<div class="brief-field" style="${f==='notes'?'grid-column:1/-1':''}"><label>${fi+1}. ${FL[fi]}</label><textarea placeholder="" oninput="calls.find(c=>c.id==='${call.id}').fields['${f}']=this.value;generateBrief()">${call.fields[f]||''}</textarea></div>`;return`<div class="brief-field"><label>${fi+1}. ${FL[fi]}</label><input type="text" value="${v}" placeholder="" oninput="calls.find(c=>c.id==='${call.id}').fields['${f}']=this.value;generateBrief()"></div>`;}).join('')}
+    </div>
+  `).join('');
+  generateBrief();
+}
+
+function fmtDate(s){if(!s)return'';const[y,m,d]=s.split('-');const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${d} ${mn[parseInt(m)-1]} ${y}`;}
+
+function generateBrief(){
+  const date=fmtDate(document.getElementById('brief-date').value);
+  let b=`📋 Today's Call Brief — ${date}\n`;
+  calls.forEach((call,i)=>{
+    const f=call.fields;
+    const name=f['client-name']||`Client ${i+1}`;
+    const time=f['call-time']||'';
+    b+=`\n-------------------------\n\nCall ${i+1} — ${name}${time?' · '+time:''}\n\n`;
+    F.forEach((fk,fi)=>{ b+=`${fi+1}. ${FL[fi]}: ${f[fk]||''}\n`; });
+  });
+  b+='\n-------------------------';
+  document.getElementById('brief-preview').textContent=b;
+  return b;
+}
+
+function copyBrief(){const t=document.getElementById('brief-preview').textContent;navigator.clipboard.writeText(t).then(()=>showToast('Copied to clipboard ✓')).catch(()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('Copied ✓');});}
+function copyAndShowSlack(){copyBrief();showToast('Copied! Open Slack → #alex-daily-brief → paste & send');}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openModal();}});
+loadTasks();renderCards();initBrief();
+</script>
+
+
+</body></html>
